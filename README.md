@@ -16,7 +16,7 @@ The commands in Gitmini are intuitively named, even for users unfamiliar with Gi
 The main command in GitMini is `git publish`, which simplifies the process of publishing code changes. Use the following syntax to execute the command:
 
 
-`git publish`
+`git publish "name of ticket"`
 
 
 When executed, the git publish command automates the following actions:
@@ -50,11 +50,11 @@ The git start command begins work on a new ticket. It performs the following act
 
 
 git update is used everytime we start or publish a ticket. It automates the following tasks:
-  - Temporary save any changes you have going on with `git stash`
-  - get an update from master so you work on up-to-date codebase with `git pull`
-  - Prompt you to fix conflicts if present
-  - Install any package recently added to repositiory with `npm install`
-  - Apply your changes again `git stash pop`
+  - Temporary saves any changes you have going on with `git stash`
+  - gets an update from master so you work on up-to-date codebase with `git pull`
+  - Prompts you to fix conflicts if present
+  - Installs any package recently added to repositiory with `npm install` (this is only web devs, should be optional or in another complementar tool)
+  - Applies your changes again `git stash pop`
 
 In the future it will be possible to run update every n seconds to be always updated and receive conflicts as soon as possible.
 
