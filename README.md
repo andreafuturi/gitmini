@@ -91,6 +91,23 @@ That's it! You have added the aliases to your Git configuration. You can now use
 
 ```bash
 [alias]
+	publish = "!f() { \
+    git add . && \
+    if [[ ! -f .git/commit-message ]]; then \
+        echo \"You did not start a ticket yet, creating one for you...\"; \
+        git start $1; \
+    fi; \
+    message=$(cat .git/commit-message); \
+	git update \"$message\" && \
+    if [[ -n $(git diff --name-only --diff-filter=U) ]]; then \
+      echo \"Please fix conflicts and try againg.\"; \
+      exit 1; \
+    fi; \
+    git add . && \
+    git commit -m \"$message\" && \
+	git push && \
+	rm -f .git/commit-message 2>/dev/null &>/dev/null; \
+  }; f"
 	start = "!f() { \
         git add . && \
         message=${1:-\"WIP $(date +%s)\"}; \
@@ -136,23 +153,14 @@ That's it! You have added the aliases to your Git configuration. You can now use
         fi; \
     }; \
     f"
-	publish = "!f() { \
-    git add . && \
-    if [[ ! -f .git/commit-message ]]; then \
-        echo \"You did not start a ticket yet, creating one for you...\"; \
-        git start $1; \
-    fi; \
-    message=$(cat .git/commit-message); \
-	git update \"$message\" && \
-    if [[ -n $(git diff --name-only --diff-filter=U) ]]; then \
-      echo \"Please fix conflicts and try againg.\"; \
-      exit 1; \
-    fi; \
-    git add . && \
-    git commit -m \"$message\" && \
-	git push && \
-	rm -f .git/commit-message 2>/dev/null &>/dev/null; \
-  }; f"
+current = "!f() { \
+        if [ -f .git/commit-message ]; then \
+            echo \"You are currently working on: $(cat .git/commit-message)\"; \
+        else \
+            echo \"You are not currently working on anything.\"; \
+        fi; \
+    }; f"
+
 ```
 
 ## Examples: 
