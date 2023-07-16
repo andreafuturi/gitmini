@@ -82,7 +82,7 @@ Returns the name of the current ticket you're working on, in case your forgot.
 2. Run the following command to open the Git configuration file in a text editor:
 `git config --global --edit`
 This command will open the global Git configuration file (~/.gitconfig) in your default text editor.
-3. Copy and paste the aliases definitions (start, pause, update, publish, reload, current) at the end of the file.
+3. Copy and paste the aliases definitions (publish, unpublish, start, pause, update, current) at the end of the file.
 4. Save the file and exit the text editor.
 
 That's it! You have added the aliases to your Git configuration. You can now use these aliases in your Git commands.
@@ -108,7 +108,7 @@ That's it! You have added the aliases to your Git configuration. You can now use
     message=${1:-$(cat .git/commit-message 2>/dev/null)}; \
     git stash push -m \"$message\" &>/dev/null && \
     echo \"Work on \"$message\" paused successfully.\" && \
-    git reload &>/dev/null; \
+    rm -f .git/commit-message 2>/dev/null &>/dev/null; \
 }; f"
     # if no changes are going on a simple pull should be faster
     # what if there are changes going on but there is also a stash with the same name? ideally apply both of them
@@ -151,16 +151,8 @@ That's it! You have added the aliases to your Git configuration. You can now use
     git add . && \
     git commit -m \"$message\" && \
 	git push && \
-	git reload &>/dev/null; \
+	rm -f .git/commit-message 2>/dev/null &>/dev/null; \
   }; f"
-reload = "!rm -f .git/commit-message 2>/dev/null && echo 'Commit message file successfully removed.'"
- current = "!f() { \
-        if [ -f .git/commit-message ]; then \
-            echo \"You are currently working on: $(cat .git/commit-message)\"; \
-        else \
-            echo \"You are not currently working on anything.\"; \
-        fi; \
-    }; f"
 ```
 
 ## Examples: 
