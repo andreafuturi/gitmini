@@ -1,9 +1,9 @@
 # GitMini: Less git, more work done.
 
 
-Gitmini is a minimal set of git commands designed to simplify developers' workflows and make their lives much easier. 
+Gitmini is a minimal set of git commands designed to simplify developers workflow. 
 Its primary goal is to automate various aspects of Git, enabling developers to focus on writing code rather than managing their repositories. 
-Gitmini revolves around the concept of tickets, which are commonly used in software development to organize and track work.
+Gitmini revolves around the concept of tickets, which are commonly used in software development to organize and track work progress.
 
 
 The commands in Gitmini are intuitively named, even for users unfamiliar with Git or version control in general.
@@ -64,20 +64,25 @@ In the future it will be possible to run update every n seconds to be always upd
 
 
 ### Minimal Approach
-
+Edit files in repository and then
 `git publish ticket-45`
 
  or
 
-`git start "work on the new login page"
-git publish`
+`git start "work on the new login page"`
+
+Edit files in repository and then 
+
+`git publish`
+
 
 
 ### Multitasking
 
 `git start feature-1`
+
 Do your work...
-...
+
 Blocked? Start a new ticket!
 
 `git start feature-2`
@@ -85,7 +90,9 @@ Blocked? Start a new ticket!
 More urgent ticket? Work on that!
 
 `git start bug-1`
+
 Do your work...
+
 `git publish`
 
 Go back to feature-1
@@ -94,8 +101,10 @@ Go back to feature-1
 Go back to feature-2
 `git start feature-2`
 
-Publish them
+**Publish the remaining tickets**
+
 `git publish feature-1`
+
 `git publish feature-2`
 
 
