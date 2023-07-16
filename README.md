@@ -58,7 +58,9 @@ git update is used everytime we start or publish a ticket. It automates the foll
 
 In the future it will be possible to run update every n seconds to be always updated and receive conflicts as soon as possible.
 
+`git current`
 
+Returns the name of the current ticket you're working on
 
 ## Examples: 
 
