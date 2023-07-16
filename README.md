@@ -3,7 +3,7 @@
 
 Gitmini is a minimal set of git commands designed to simplify developers workflow. 
 Its primary goal is to automate various aspects of Git, enabling developers to focus on writing code rather than managing their repositories. 
-Gitmini revolves around the concept of tickets, which are commonly used in software development to organize and track work progress.
+Gitmini revolves around the concept of tickets, which are commonly used to organize and track work progress in software development.
 
 
 The commands in Gitmini are intuitively named, even for users unfamiliar with Git or version control in general.
@@ -29,7 +29,19 @@ When executed, the git publish command automates the following actions:
 (Soon, an option to create a merge request instead of directly pushing to the master branch will be added.)
 
 
+`git unpublish "name of ticket"`
 
+When executed, the git publish command automates the following actions:
+- Safely updates your local repository with `git update`
+- Asks you to fix conflicts if they're present
+- Reverts the commit of the ticket you want to unpublish
+- Asks you fix conflicts if they're present
+- Adds all changes to the staging area using `git add .`
+- Commits the changes using specified ticket name (defaults to WIP-date) `git commit -m "revert of WIP-date"`
+- Pushes your changes to repository's server so other people can get your revert `git push`
+
+Git unpublish is still under work
+  
 ### Optional Commands
 
 
@@ -60,12 +72,8 @@ In the future it will be possible to run update every n seconds to be always upd
 
 `git current`
 
-Returns the name of the current ticket you're working on
+Returns the name of the current ticket you're working on, in case your forgot.
 
-
-`git unpublish`
-
-Coming soon
 
 ## Install: 
 1. Open a terminal or command prompt.
