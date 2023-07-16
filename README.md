@@ -62,6 +62,97 @@ In the future it will be possible to run update every n seconds to be always upd
 
 Returns the name of the current ticket you're working on
 
+
+`git unpublish`
+
+Coming soon
+
+## Install: 
+1. Open a terminal or command prompt.
+2. Run the following command to open the Git configuration file in a text editor:
+`git config --global --edit`
+This command will open the global Git configuration file (~/.gitconfig) in your default text editor.
+3. Copy and paste the aliases definitions (start, pause, update, publish, reload, current) at the end of the file.
+4. Save the file and exit the text editor.
+
+That's it! You have added the aliases to your Git configuration. You can now use these aliases in your Git commands.
+
+## Aliases
+
+```
+[alias]
+	start = "!f() { \
+        git add . && \
+        message=${1:-\"WIP $(date +%s)\"}; \
+        if [ -f .git/commit-message ]; then \
+            existing_message=$(cat .git/commit-message); \
+            if [ \"$message\" != \"$existing_message\" ]; then \
+				git pause \"$existing_message\"; \
+			fi \
+        fi; \
+        echo \"$message\" > .git/commit-message; \
+        echo \"Work on \"$message\" started successfully.\" && \
+        git update \"$message\" ; \
+    }; f"
+	pause="!f() { \
+    message=${1:-$(cat .git/commit-message 2>/dev/null)}; \
+    git stash push -m \"$message\" &>/dev/null && \
+    echo \"Work on \"$message\" paused successfully.\" && \
+    git reload &>/dev/null; \
+}; f"
+    # if no changes are going on a simple pull should be faster
+    # what if there are changes going on but there is also a stash with the same name? ideally apply both of them
+    update = "!f() { \
+        if [[ -z \"$1\" ]]; then \
+            message=$(cat .git/commit-message 2>/dev/null); \
+            message=${message:-\"WIP $(date +%s)\"}; \
+        else \
+            message=$1; \
+        fi; \
+        git stash push -m \"$message\" -u &>/dev/null; \
+        git pull &>/dev/null; \
+        stash_ref=$(git stash list | grep -w \"$message\" | cut -d \"{\" -f2 | cut -d \"}\" -f1); \
+        git stash apply stash@{$stash_ref} &>/dev/null; \
+        git stash drop stash@{$stash_ref} &>/dev/null; \
+        unresolved_files=$(git diff --name-only --diff-filter=U); \
+        if [[ -n $unresolved_files ]]; then \
+            echo \"BEFORE DOING ANYTHING ELSE, FIX CONFLICTS IN THE FOLLOWING FILES:\"; \
+            echo \"$unresolved_files\"; \
+        fi; \
+        commit_range=\"HEAD~$stash_ref..HEAD\"; \
+        modified_files=$(git diff --name-only $commit_range); \
+        if echo \"$modified_files\" | grep -q \"package.json\"; then \
+            npm install; \
+        fi; \
+    }; \
+    f"
+	publish = "!f() { \
+    git add . && \
+    if [[ ! -f .git/commit-message ]]; then \
+        echo \"You did not start a ticket yet, creating one for you...\"; \
+        git start $1; \
+    fi; \
+    message=$(cat .git/commit-message); \
+	git update \"$message\" && \
+    if [[ -n $(git diff --name-only --diff-filter=U) ]]; then \
+      echo \"Please fix conflicts and try againg.\"; \
+      exit 1; \
+    fi; \
+    git add . && \
+    git commit -m \"$message\" && \
+	git push && \
+	git reload &>/dev/null; \
+  }; f"
+reload = "!rm -f .git/commit-message 2>/dev/null && echo 'Commit message file successfully removed.'"
+ current = "!f() { \
+        if [ -f .git/commit-message ]; then \
+            echo \"You are currently working on: $(cat .git/commit-message)\"; \
+        else \
+            echo \"You are not currently working on anything.\"; \
+        fi; \
+    }; f"
+```
+
 ## Examples: 
 
 
