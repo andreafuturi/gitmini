@@ -13,7 +13,7 @@ The commands in Gitmini are intuitively named, even for users unfamiliar with Gi
 ## Usage
 
 
-The main command in GitMini is `git publish`, which simplifies the process of publishing code changes. Use if after working on the repo like this:
+The main command in GitMini is `git publish`, which simplifies the process of publishing code changes. Use it after working on the repo like this:
 
 ```bash
 git publish "Ticket name/number"
