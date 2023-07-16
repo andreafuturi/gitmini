@@ -13,11 +13,11 @@ The commands in Gitmini are intuitively named, even for users unfamiliar with Gi
 ## Usage
 
 
-The main command in GitMini is `git publish`, which simplifies the process of publishing code changes. Use the following syntax to execute the command:
+The main command in GitMini is `git publish`, which simplifies the process of publishing code changes. Use if after working on the repo like this:
 
-
-`git publish "name of ticket"`
-
+```bash
+git publish "Ticket name/number"
+```
 
 When executed, the git publish command automates the following actions:
   - Safely updates your local repository with `git update`
@@ -28,9 +28,9 @@ When executed, the git publish command automates the following actions:
 
 (Soon, an option to create a merge request instead of directly pushing to the master branch will be added.)
 
-
-`git unpublish "name of ticket"`
-
+```bash
+git unpublish "Ticket name/number"
+```
 When executed, the git publish command automates the following actions:
 - Safely updates your local repository with `git update`
 - Asks you to fix conflicts if they're present
@@ -44,9 +44,9 @@ Git unpublish is still under work
   
 ### Optional Commands
 
-
-`git start "name of ticket"`
-
+```bash
+git start "name of ticket"
+```
 
 
 
@@ -55,9 +55,11 @@ The git start command begins work on a new ticket. It performs the following act
   - Prompts you to resolve any conflicts, if present.
   - Prepare name of ticket as commit message when publishing with git publish (usefult for a future jira integration, name defaults to WIP-currentdate when no specified)
 
+In case you forgot doing it, you can start working on a ticket after you edited some files. They will published when you git publish
 
-`git update`
-
+```bash
+git update
+```
 
 
 
@@ -69,9 +71,9 @@ git update is used everytime we start or publish a ticket. It automates the foll
   - Applies your changes again `git stash pop`
 
 In the future it will be possible to run update every n seconds to be always updated and receive conflicts as soon as possible.
-
-`git current`
-
+```bash
+git current
+```
 Returns the name of the current ticket you're working on, in case your forgot.
 
 
@@ -87,7 +89,7 @@ That's it! You have added the aliases to your Git configuration. You can now use
 
 ## Aliases
 
-```
+```bash
 [alias]
 	start = "!f() { \
         git add . && \
@@ -166,45 +168,55 @@ reload = "!rm -f .git/commit-message 2>/dev/null && echo 'Commit message file su
 
 ### Minimal Approach
 Edit files in repository and then
-`git publish ticket-45`
+```bash
+git publish ticket-45
+```
 
  or
-
-`git start "work on the new login page"`
+```bash
+git start "work on the new login page"
+```
 
 Edit files in repository and then 
-
-`git publish`
-
+```bash
+git publish
+```
 
 
 ### Multitasking
-
-`git start feature-1`
-
+```bash
+git start feature-1
+```
 Do your work...
 
 Blocked? Start a new ticket!
 
-`git start feature-2`
+```bash
+git start feature-2
+```
 
 More urgent ticket? Work on that!
 
-`git start bug-1`
+```bash
+git start bug-1
+```
 
 Do your work...
-
-`git publish`
-
+```bash
+git publish
+```
 Go back to feature-1
-`git start feature-1`
-
+```bash
+git start feature-1
+```
 Go back to feature-2
-`git start feature-2`
-
-**Publish the remaining tickets**
-
+```bash
+git start feature-2
+```
+**Publish the remaining tickets when completed**
+```bash
 `git publish feature-1`
+```
 
 `git publish feature-2`
 
