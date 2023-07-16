@@ -1,4 +1,4 @@
-# GitMini: Less git, more work done
+# GitMini: Less git, more work done.
 
 
 Gitmini is a minimal set of git commands designed to simplify developers' workflows and make their lives much easier. 
@@ -57,17 +57,6 @@ git update is used everytime we start or publish a ticket. It automates the foll
   - Apply your changes again `git stash pop`
 
 In the future it will be possible to run update every n seconds to be always updated and receive conflicts as soon as possible.
-
-
-`git pause `
-
-
-
-
-It is used internally when you start a new ticket without publishing the one you were working on. 
-It will stash current changes with `git stash push -m "name of current WIP"`
-
-
 
 
 
