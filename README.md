@@ -2,18 +2,16 @@
 
 
 Gitmini is a minimal set of git commands designed to simplify developers workflow. 
-
 Its primary goal is to automate various aspects of Git, enabling developers to focus on writing code rather than managing their repositories. 
 
 Gitmini revolves around the concept of tickets, which are commonly used to organize and track work progress in software development.
 
 
-The commands in Gitmini are intuitively named, even for users unfamiliar with Git or version control in general.
-
 
 
 ## Usage
 
+The commands in Gitmini are intuitively named, even for users unfamiliar with Git or version control in general.
 
 The main command in GitMini is `git publish`, which simplifies the process of publishing code changes. Use it after working on the repo like this:
 
