@@ -40,7 +40,6 @@ When executed, the git unpublish command automates the following actions:
 - Commits the changes using specified ticket name (defaults to current ticket) `git commit -m "revert of WIP-{timestamp}"`
 - Pushes your changes to repository's server so other people can get your revert `git push`
 
-Git unpublish is still under work
   
 ### Optional Commands
 
@@ -79,11 +78,14 @@ Returns the name of the current ticket you're working on, in case your forgot.
 
 
 ## Install: 
+
+Requirements: git must be installed
+
 1. Open a terminal or command prompt.
 2. Run the following command to install the package:
 `npm install gitmini -g`
 That's it! You have added the aliases to your Git configuration. You can now use these aliases in your Git commands.
-And you can also use them with only 2 letters: gm publish, gm unpusblish
+And you can also use them with only 2 letters: `gm`
 
 ## Examples: 
 
