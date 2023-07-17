@@ -24,7 +24,7 @@ When executed, the git publish command automates the following actions:
   - Asks you to fix conflicts if they're present
   - Adds all changes to the staging area using `git add .`
   - Commits the changes using specified ticket name (defaults to WIP date) `git commit -m "WIP {timestamp}"`
-  - Pushes your changes to repository's server so other people can get your changes `git push`
+  - Pushes your changes to repository's server so other people can get your changes with `git push`
 
 (Soon, an option to create a merge request instead of directly pushing to the master branch will be added.)
 
