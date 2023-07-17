@@ -26,12 +26,12 @@ When executed, the git publish command automates the following actions:
   - Safely updates your local repository with `git update`
   - Prompts you to resolve any conflicts before going on, if present.
   - Adds all changes to the staging area using `git add .`
-  - Commits the changes using specified ticket name (defaults to WIP-{timestamp}) `git commit -m WIP-{timestamp}`
+  - Commits the changes using specified ticket name `git commit -m "Ticket name/number"`
   - Pushes your changes to repository's server so other people can get your changes with `git push`
 
 (Soon, an option to create a merge request instead of directly pushing to the master branch will be added.)
 
-Name of ticket is optional. You can also `git publish` and WIP-{progressive_number} will be used as ticket-name.
+Name of ticket is optional. You can also `git publish` and WIP-{timestamp} will be used as ticket-name.
 This will make GitMini even simpler but consider that it is strongly recommended to give meaningfuls names to every code publish.
 
 ```bash
