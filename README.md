@@ -50,7 +50,7 @@ git start "name of ticket"
 
 
 
-The git start command begins work on a new ticket. It performs the following actions:
+The` git start` command begins work on a new ticket. It performs the following actions:
   - Retrieves updates from remote origin to ensure you are working on an up-to-date codebase using `git update`
   - Prompts you to resolve any conflicts, if present.
   - Prepare name of ticket as commit message when publishing with git publish (usefult for a future jira integration, name defaults to "WIP {timestamp}" when no specified)
@@ -62,15 +62,15 @@ git update
 ```
 
 
-
-git update is used everytime we start or publish a ticket. It automates the following tasks:
+In the future it will be possible to run update every n seconds to be always updated and receive conflicts as soon as possible.
+Right `git update` is used internally everytime we start or publish a ticket. It automates the following tasks:
   - Temporary saves any changes you have going on with `git stash`
   - gets an update from master so you work on up-to-date codebase with `git pull`
   - Prompts you to fix conflicts if present
   - Installs any package recently added to repositiory with `npm install` (this is only web devs, should be optional or in another complementar tool)
   - Applies your changes again `git stash pop`
 
-In the future it will be possible to run update every n seconds to be always updated and receive conflicts as soon as possible.
+
 ```bash
 git current
 ```
