@@ -23,7 +23,7 @@ When executed, the git publish command automates the following actions:
   - Safely updates your local repository with `git update`
   - Asks you to fix conflicts if they're present
   - Adds all changes to the staging area using `git add .`
-  - Commits the changes using specified ticket name (defaults to WIP-date) `git commit -m "WIP-date"`
+  - Commits the changes using specified ticket name (defaults to WIP date) `git commit -m "WIP {timestamp}"`
   - Pushes your changes to repository's server so other people can get your changes `git push`
 
 (Soon, an option to create a merge request instead of directly pushing to the master branch will be added.)
@@ -37,7 +37,7 @@ When executed, the git publish command automates the following actions:
 - Reverts the commit of the ticket you want to unpublish
 - Asks you fix conflicts if they're present
 - Adds all changes to the staging area using `git add .`
-- Commits the changes using specified ticket name (defaults to WIP-date) `git commit -m "revert of WIP-date"`
+- Commits the changes using specified ticket name (defaults to WIP {timestamp}) `git commit -m "revert of WIP {timestamp}"`
 - Pushes your changes to repository's server so other people can get your revert `git push`
 
 Git unpublish is still under work
@@ -53,7 +53,7 @@ git start "name of ticket"
 The git start command begins work on a new ticket. It performs the following actions:
   - Retrieves updates from remote origin to ensure you are working on an up-to-date codebase using `git update`
   - Prompts you to resolve any conflicts, if present.
-  - Prepare name of ticket as commit message when publishing with git publish (usefult for a future jira integration, name defaults to WIP-currentdate when no specified)
+  - Prepare name of ticket as commit message when publishing with git publish (usefult for a future jira integration, name defaults to "WIP {timestamp}" when no specified)
 
 In case you forgot doing it, you can start working on a ticket after you edited some files. They will published when you git publish
 
