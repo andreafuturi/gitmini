@@ -40,6 +40,7 @@ When executed, the git unpublish command automates the following actions:
 - Commits the changes using specified ticket name (defaults to current ticket) `git commit -m "revert of WIP-{timestamp}"`
 - Pushes your changes to repository's server so other people can get your revert `git push`
 
+Tickets names must be unique
   
 ### Optional Commands
 
@@ -58,18 +59,18 @@ The git start command begins work on a new ticket. It performs the following act
 In case you forgot doing it, you can start working on a ticket after you edited some files. They will published when you git publish
 
 ```bash
-git update
+git refresh
 ```
 
-
-In the future it will be possible to run update every n seconds to be always updated and receive conflicts as soon as possible.
-Right now git update is used internally everytime we start or publish a ticket. It automates the following tasks:
+Refresh your code with latest update from server while keeping your work undisturbed.
+It is used internally everytime we start or publish a ticket. It automates the following tasks:
   - Temporary saves any changes you have going on with `git stash`
   - gets an update from master so you work on up-to-date codebase with `git pull`
   - Prompts you to fix conflicts, if present
   - Installs any package recently added to repositiory with `npm install` (this is only web devs, should be optional or in another complementar tool)
   - Applies your changes again `git stash pop`
 
+In the future it will be possible to run update every n seconds to be always updated and receive conflicts as soon as possible.
 
 ```bash
 git current
@@ -94,6 +95,12 @@ And you can also use them with only 2 letters: `gm`
 Edit files in repository and then
 ```bash
 gm publish
+```
+
+Something went wrong? Revert any ticket at any moment with
+
+```bash
+gm unpublish "Ticket name/number"
 ```
 
  or
@@ -139,11 +146,8 @@ git start feature-2
 ```
 **Publish the remaining tickets when completed**
 ```bash
-`git publish feature-1`
+git publish feature-1
+git publish feature-2
 ```
-
-`git publish feature-2`
-
-
 
 
