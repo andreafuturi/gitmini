@@ -35,7 +35,7 @@ When executed, the git publish command automates the following actions:
 - Safely updates your local repository with `git update`
 - Asks you to fix conflicts if they're present
 - Reverts the commit of the ticket you want to unpublish
-- Asks you fix conflicts if they're present
+- Asks you to fix conflicts if they're present
 - Adds all changes to the staging area using `git add .`
 - Commits the changes using specified ticket name (defaults to WIP {timestamp}) `git commit -m "revert of WIP {timestamp}"`
 - Pushes your changes to repository's server so other people can get your revert `git push`
