@@ -31,11 +31,14 @@ When executed, the git publish command automates the following actions:
 
 (Soon, an option to create a merge request instead of directly pushing to the master branch will be added.)
 
+Name of ticket is optional. You can also `git publish` and WIP-{progressive_number} will be used as ticket-name.
+This will make GitMini even simpler but consider that it is strongly recommended to give meaningfuls names to every code publish.
+
 ```bash
 git unpublish "Ticket name/number"
 ```
 When executed, the git unpublish command automates the following actions:
-- Safely updates your local repository with `git update`
+- Safely refresh your local repository with `git refresh`
 - Prompts you to resolve any conflicts before going on, if present.
 - Reverts the commit of the ticket you want to unpublish
 - Asks you to fix conflicts if they're present
@@ -43,7 +46,7 @@ When executed, the git unpublish command automates the following actions:
 - Commits the changes using specified ticket name (defaults to current ticket) `git commit -m "revert of WIP-{timestamp}"`
 - Pushes your changes to repository's server so other people can get your revert `git push`
 
-Tickets names must be unique
+Tickets names must be unique. GitMini works also offline you don't need to set remote orgin, it will work with normal commits.
   
 ### Optional Commands
 
@@ -55,7 +58,7 @@ git start "Ticket name/number"
 
 The git start command begins work on a new ticket. It performs the following actions:
   - Initialize the repository if not yet done with `git init`
-  - Retrieves updates from remote origin to ensure you are working on an up-to-date codebase using `git update`
+  - Retrieves updates from remote origin to ensure you are working on an up-to-date codebase using `git refresh`
   - Prompts you to resolve any conflicts, if present.
   - Prepare name of ticket as commit message when publishing with git publish (usefult for a future jira integration, name defaults to "WIP {timestamp}" when no specified)
 
@@ -65,20 +68,25 @@ In case you forgot doing it, you can start working on a ticket after you edited 
 git refresh
 ```
 
-Refresh your code with latest update from server while keeping your work undisturbed.
+Refresh your code with latest updates from server while keeping your work undisturbed.
 It is used internally everytime we start or publish a ticket. It automates the following tasks:
   - Temporary saves any changes you have going on with `git stash`
-  - gets an update from master so you work on up-to-date codebase with `git pull`
+  - gets an update from server with `git pull`
   - Prompts you to fix conflicts, if present
   - Installs any package recently added to repositiory with `npm install` (this is only web devs, should be optional or in another complementar tool)
   - Applies your changes again `git stash pop`
 
-In the future it will be possible to run update every n seconds to be always updated and receive conflicts as soon as possible.
+In the future it will be possible to run refresh every n seconds to be always updated and receive conflicts as soon as possible.
+
+```bash
+git pause
+```
+Pause your current work and see the code as it was without your changes (resume it with git start "ticket name")
 
 ```bash
 git current
 ```
-Returns the name of the current ticket you're working on, in case your forgot.
+Returns the name of the current ticket you're working on, in case your forgot. Makes sense only if you use git start.
 
 
 ## Install: 
@@ -88,10 +96,10 @@ Requirements: git must be installed
 1. Open a terminal or command prompt.
 2. Run the following command to install the package:
 ```bash
-npm install gitmini -g
+npm install GitMini -g
 ```
-That's it! You have added the aliases to your Git configuration. You can now use these aliases in your Git commands.
-And you can also use them with only 2 letters: `gm` which of corse stands for gitmini.
+That's it! You have added the aliases to your Git configuration. You can now use these commands in your repositories.
+And you can also use them with only 2 letters: `gm` which of corse stands for GitMini.
 
 ## Examples: 
 
