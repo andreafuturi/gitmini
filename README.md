@@ -1,9 +1,9 @@
 # GitMini: Less git, more work done.
 
-GitMini is a minimal collection of simple git aliases that make developers' workflow easier.
-Its main purpose is to automate different tasks in Git, allowing developers to focus on coding rather than managing their repositories. Gitmini doesn't replace Git or remove any of its functionalities; it simply provides a simplified way to interact with it. 
+GitMini is a minimal collection of intuitive git aliases that make developers' workflow much easier.
+Its main purpose is to automate different tasks in Git, allowing developers to focus on coding rather than managing their repositories. GitMini doesn't replace Git or remove any of its functionalities; it just provides a simplified way to interact with it. 
 
-It works independently of branches, meaning you can use it in any branch, although it is primarily tested and intended for use on the master branch to keep things simple.
+It works independently of branches, meaning you can use it in any branch, although it is primarily tested and intended for use on the master branch.
 
 GitMini revolves around the concept of Tickets, which are commonly used to organize and track work progress in Software Development.
 
@@ -11,7 +11,7 @@ GitMini revolves around the concept of Tickets, which are commonly used to organ
 
 ## Usage
 
-The commands in Gitmini are intuitively named, even for users unfamiliar with Git or version control in general.
+The commands in GitMini are intuitively named, even for users unfamiliar with Git or version control in general.
 
 The main command in GitMini is `git publish`, which simplifies the process of publishing code changes. Use it after working on the repo like this:
 
@@ -21,9 +21,9 @@ git publish "Ticket name/number"
 
 When executed, the git publish command automates the following actions:
   - Safely updates your local repository with `git update`
-  - Asks you to fix conflicts if they're present
+  - Prompts you to resolve any conflicts before going on, if present.
   - Adds all changes to the staging area using `git add .`
-  - Commits the changes using specified ticket name (defaults to WIP date) `git commit -m "WIP {timestamp}"`
+  - Commits the changes using specified ticket name (defaults to WIP-{timestamp}) `git commit -m WIP-{timestamp}`
   - Pushes your changes to repository's server so other people can get your changes with `git push`
 
 (Soon, an option to create a merge request instead of directly pushing to the master branch will be added.)
@@ -31,13 +31,13 @@ When executed, the git publish command automates the following actions:
 ```bash
 git unpublish "Ticket name/number"
 ```
-When executed, the git publish command automates the following actions:
+When executed, the git unpublish command automates the following actions:
 - Safely updates your local repository with `git update`
-- Asks you to fix conflicts if they're present
+- Prompts you to resolve any conflicts before going on, if present.
 - Reverts the commit of the ticket you want to unpublish
 - Asks you to fix conflicts if they're present
 - Adds all changes to the staging area using `git add .`
-- Commits the changes using specified ticket name (defaults to WIP {timestamp}) `git commit -m "revert of WIP {timestamp}"`
+- Commits the changes using specified ticket name (defaults to current ticket) `git commit -m "revert of WIP-{timestamp}"`
 - Pushes your changes to repository's server so other people can get your revert `git push`
 
 Git unpublish is still under work
@@ -45,12 +45,13 @@ Git unpublish is still under work
 ### Optional Commands
 
 ```bash
-git start "name of ticket"
+git start "Ticket name/number"
 ```
 
 
 
 The git start command begins work on a new ticket. It performs the following actions:
+  - Initialize the repository if not yet done with `git init`
   - Retrieves updates from remote origin to ensure you are working on an up-to-date codebase using `git update`
   - Prompts you to resolve any conflicts, if present.
   - Prepare name of ticket as commit message when publishing with git publish (usefult for a future jira integration, name defaults to "WIP {timestamp}" when no specified)
@@ -66,7 +67,7 @@ In the future it will be possible to run update every n seconds to be always upd
 Right now git update is used internally everytime we start or publish a ticket. It automates the following tasks:
   - Temporary saves any changes you have going on with `git stash`
   - gets an update from master so you work on up-to-date codebase with `git pull`
-  - Prompts you to fix conflicts if present
+  - Prompts you to fix conflicts, if present
   - Installs any package recently added to repositiory with `npm install` (this is only web devs, should be optional or in another complementar tool)
   - Applies your changes again `git stash pop`
 
@@ -79,89 +80,10 @@ Returns the name of the current ticket you're working on, in case your forgot.
 
 ## Install: 
 1. Open a terminal or command prompt.
-2. Run the following command to open the Git configuration file in a text editor:
-`git config --global --edit`
-This command will open the global Git configuration file (~/.gitconfig) in your default text editor.
-3. Copy and paste the aliases definitions (publish, unpublish, start, pause, update, current) at the end of the file.
-4. Save the file and exit the text editor.
-
+2. Run the following command to install the package:
+`npm install gitmini -g`
 That's it! You have added the aliases to your Git configuration. You can now use these aliases in your Git commands.
-
-## Aliases
-
-```bash
-[alias]
-	publish = "!f() { \
-    git add . && \
-    if [[ ! -f .git/commit-message ]]; then \
-        echo \"You did not start a ticket yet, creating one for you...\"; \
-        git start $1; \
-    fi; \
-    message=$(cat .git/commit-message); \
-	git update \"$message\" && \
-    if [[ -n $(git diff --name-only --diff-filter=U) ]]; then \
-      echo \"Please fix conflicts and try againg.\"; \
-      exit 1; \
-    fi; \
-    git add . && \
-    git commit -m \"$message\" && \
-	git push && \
-	rm -f .git/commit-message 2>/dev/null &>/dev/null; \
-  }; f"
-	start = "!f() { \
-        git add . && \
-        message=${1:-\"WIP $(date +%s)\"}; \
-        if [ -f .git/commit-message ]; then \
-            existing_message=$(cat .git/commit-message); \
-            if [ \"$message\" != \"$existing_message\" ]; then \
-				git pause \"$existing_message\"; \
-			fi \
-        fi; \
-        echo \"$message\" > .git/commit-message; \
-        echo \"Work on \"$message\" started successfully.\" && \
-        git update \"$message\" ; \
-    }; f"
-	pause="!f() { \
-    message=${1:-$(cat .git/commit-message 2>/dev/null)}; \
-    git stash push -m \"$message\" &>/dev/null && \
-    echo \"Work on \"$message\" paused successfully.\" && \
-    rm -f .git/commit-message 2>/dev/null &>/dev/null; \
-}; f"
-    # if no changes are going on a simple pull should be faster
-    # what if there are changes going on but there is also a stash with the same name? ideally apply both of them
-    update = "!f() { \
-        if [[ -z \"$1\" ]]; then \
-            message=$(cat .git/commit-message 2>/dev/null); \
-            message=${message:-\"WIP $(date +%s)\"}; \
-        else \
-            message=$1; \
-        fi; \
-        git stash push -m \"$message\" -u &>/dev/null; \
-        git pull &>/dev/null; \
-        stash_ref=$(git stash list | grep -w \"$message\" | cut -d \"{\" -f2 | cut -d \"}\" -f1); \
-        git stash apply stash@{$stash_ref} &>/dev/null; \
-        git stash drop stash@{$stash_ref} &>/dev/null; \
-        unresolved_files=$(git diff --name-only --diff-filter=U); \
-        if [[ -n $unresolved_files ]]; then \
-            echo \"BEFORE DOING ANYTHING ELSE, FIX CONFLICTS IN THE FOLLOWING FILES:\"; \
-            echo \"$unresolved_files\"; \
-        fi; \
-        commit_range=\"HEAD~$stash_ref..HEAD\"; \
-        modified_files=$(git diff --name-only $commit_range); \
-        if echo \"$modified_files\" | grep -q \"package.json\"; then \
-            npm install; \
-        fi; \
-    }; \
-    f"
-current = "!f() { \
-        if [ -f .git/commit-message ]; then \
-            echo \"You are currently working on: $(cat .git/commit-message)\"; \
-        else \
-            echo \"You are not currently working on anything.\"; \
-        fi; \
-    }; f"
-
-```
+And you can also use them with only 2 letters: gm publish, gm unpusblish
 
 ## Examples: 
 
@@ -169,7 +91,7 @@ current = "!f() { \
 ### Minimal Approach
 Edit files in repository and then
 ```bash
-git publish ticket-45
+gm publish
 ```
 
  or
