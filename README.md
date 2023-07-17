@@ -1,5 +1,8 @@
 # GitMini: Less git, more work done.
 
+
+![git meme](https://imgur.com/g9YTtMF)
+
 GitMini is a minimal collection of intuitive git aliases that make developers' workflow much easier.
 Its main purpose is to automate different tasks in Git, allowing developers to focus on coding rather than managing their repositories. GitMini doesn't replace Git or remove any of its functionalities; it just provides a simplified way to interact with it. 
 
@@ -84,9 +87,11 @@ Requirements: git must be installed
 
 1. Open a terminal or command prompt.
 2. Run the following command to install the package:
-`npm install gitmini -g`
+```bash
+npm install gitmini -g
+```
 That's it! You have added the aliases to your Git configuration. You can now use these aliases in your Git commands.
-And you can also use them with only 2 letters: `gm`
+And you can also use them with only 2 letters: `gm` which of corse stands for gitmini.
 
 ## Examples: 
 
