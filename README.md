@@ -1,7 +1,7 @@
 # GitMini: Less git, more work done.
 
 
-![git meme](https://imgur.com/g9YTtMF)
+<img src="https://i.imgur.com/g9YTtMF.png" alt="git meme" width="300px" height="auto">
 
 GitMini is a minimal collection of intuitive git aliases that make developers' workflow much easier.
 Its main purpose is to automate different tasks in Git, allowing developers to focus on coding rather than managing their repositories. GitMini doesn't replace Git or remove any of its functionalities; it just provides a simplified way to interact with it. 
