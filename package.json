@@ -1,0 +1,26 @@
+{
+  "name": "gitmini",
+  "version": "0.0.21",
+  "description": "Minimal automated approach to GIT (git publish, git unpublish)",
+  "bin": {
+    "gm": "bin/index.sh"
+  },
+  "scripts": {
+    "postinstall": "git config --global alias.publish '!gm publish' && git config --global alias.unpublish '!gm unpublish' && git config --global alias.start '!gm start' && git config --global alias.refresh '!gm refresh' && git config --global alias.current '!gm current'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/andreafuturi/gitmini.git"
+  },
+  "keywords": [
+    "git",
+    "simplified",
+    "workflow"
+  ],
+  "author": "andreafuturi",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/andreafuturi/gitmini/issues"
+  },
+  "homepage": "https://github.com/andreafuturi/gitmini#readme"
+}
