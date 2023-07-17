@@ -1,8 +1,10 @@
 # GitMini: Less git, more work done.
 
 
-Gitmini is a minimal set of git commands designed to simplify developers workflow. 
+Gitmini is a minimal set of git aliases designed to simplify developers workflow. 
 Its primary goal is to automate various aspects of Git, enabling developers to focus on writing code rather than managing their repositories. 
+It doest not replace git or remove its functionalities, it's just an abstraction of it.
+It is branch-indipendent meaning you can use it in any branch (though it is tested and intended to be used on master for simplicity)
 
 Gitmini revolves around the concept of tickets, which are commonly used to organize and track work progress in software development.
 
