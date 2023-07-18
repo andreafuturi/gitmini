@@ -63,8 +63,6 @@ The git start command begins work on a new ticket. It performs the following act
   - Prompts you to resolve any conflicts, if present.
   - Prepare name of ticket as commit message when publishing with git publish (usefult for a future jira integration, name defaults to "WIP {timestamp}" when no specified)
 
-In case you forgot doing it, you can start working on a ticket after you edited some files. They will published when you git publish
-
 ```bash
 git refresh
 ```
@@ -74,7 +72,6 @@ It is used internally everytime we start or publish a ticket. It automates the f
   - Temporary saves any changes you have going on with `git stash`
   - gets an update from server with `git pull`
   - Prompts you to fix conflicts, if present
-  - Installs any package recently added to repositiory with `npm install` (this is only web devs, should be optional or in another complementar tool)
   - Applies your changes again `git stash pop`
 
 In the future it will be possible to run refresh every n seconds to be always updated and receive conflicts as soon as possible.
