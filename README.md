@@ -97,23 +97,27 @@ And you can also use them with only 2 letters: `gm` which stands for GitMini.
 
 
 ### Minimal Approach
-Edit files in repository and then
+1. Make edits to files in the repository
+2. Publish your changes with a default ticket name:
+
 ```bash
 gm publish
 ```
-
-Something went wrong? Revert any ticket at any moment with
+3. Something went wrong? Revert your last publish
 
 ```bash
-gm unpublish "Ticket name/number"
+gm unpublish
 ```
+### Normal Approach
 
- or
+1. Start a new ticket
+
 ```bash
 git start "work on the new login page"
 ```
 
-Edit files in repository and then 
+2. Make edits to files in the repository and than publish them with
+
 ```bash
 git publish
 ```
