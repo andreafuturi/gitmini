@@ -23,7 +23,7 @@ git publish "Ticket name/number"
 ```
 
 When executed, the git publish command automates the following actions:
-  - Safely updates your local repository with `git update`
+  - Safely updates your local repository
   - Prompts you to resolve any conflicts before going on, if present.
   - Adds all changes to the staging area using `git add .`
   - Commits the changes using specified ticket name `git commit -m "Ticket name/number"`
@@ -31,22 +31,23 @@ When executed, the git publish command automates the following actions:
 
 (Soon, an option to create a merge request instead of directly pushing to the master branch will be added.)
 
-Name of ticket is optional. You can also `git publish` and WIP-{timestamp} will be used as ticket-name.
-This will make GitMini even simpler but consider that it is strongly recommended to give meaningfuls names to every code publish.
+
 
 ```bash
 git unpublish "Ticket name/number"
 ```
 When executed, the git unpublish command automates the following actions:
-- Safely refresh your local repository with `git refresh`
+- Safely refresh your local repository
 - Prompts you to resolve any conflicts before going on, if present.
 - Reverts the commit of the ticket you want to unpublish
 - Asks you to fix conflicts if they're present
 - Adds all changes to the staging area using `git add .`
-- Commits the changes using specified ticket name (defaults to current ticket) `git commit -m "revert of WIP-{timestamp}"`
+- Commits the changes using specified ticket name (defaults to current ticket) `git commit -m "revert of {last-ticket-name}"`
 - Pushes your changes to repository's server so other people can get your revert `git push`
 
-Tickets names must be unique. GitMini works also offline you don't need to set remote orgin, it will work with normal commits.
+Ticket name is optional but must be unique if used. If you use `git publish` default ticket name will be "WIP-{timestamp}".
+This will make GitMini even simpler but consider that it is strongly recommended to give meaningfuls names to every code publish.
+GitMini works also offline you don't need to set remote orgin, it will work with normal commits in the background.
   
 ### Optional Commands
 
