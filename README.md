@@ -1,20 +1,14 @@
-# GitMini: Less git, more work done.
+# GitMini: Less git, more productivity.
 
 
 <img src="https://i.imgur.com/g9YTtMF.png" alt="git meme" width="300px" height="auto">
 
-GitMini is a powerful tool that simplify your Git workflow.
+GitMini is a powerful tool that simplify the way you use Git.
 It revolves around the concept of tickets, which are commonly used to organize and track work progress in Software Development.
 
-With intuitive commands and clever automation, GitMini simplifies common Git tasks, allowing developers to focus on coding rather than managing their repositories.
-GitMini doesn't replace Git or remove any of its functionalities; it just provides a simplified way to interact with it. 
-
-Say goodbye to complex Git commands and hello to productivity!
-
+GitMini doesn't replace Git; it enhances it by automating repetitive tasks, allowing you to focus on what truly matters: writing code.
 
 ## Usage
-
-The commands in GitMini are intuitively named, even for users unfamiliar with Git or version control in general.
 
 The main command in GitMini is `git publish`, which simplifies the process of publishing code changes. Use it after working on the repo like this:
 
