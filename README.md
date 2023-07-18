@@ -96,7 +96,7 @@ Requirements: git must be installed
 1. Open a terminal or command prompt.
 2. Run the following command to install the package:
 ```bash
-npm install GitMini -g
+npm install gitmini -g
 ```
 That's it! You have added the aliases to your Git configuration. You can now use these commands in your repositories.
 And you can also use them with only 2 letters: `gm` which of corse stands for GitMini.
