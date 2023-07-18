@@ -3,13 +3,13 @@
 
 <img src="https://i.imgur.com/g9YTtMF.png" alt="git meme" width="300px" height="auto">
 
-GitMini is a minimal collection of intuitive git aliases that make developers' workflow much easier.
-Its main purpose is to automate different tasks in Git, allowing developers to focus on coding rather than managing their repositories. GitMini doesn't replace Git or remove any of its functionalities; it just provides a simplified way to interact with it. 
+GitMini is a powerful tool that simplify your Git workflow.
+It revolves around the concept of tickets, which are commonly used to organize and track work progress in Software Development.
 
-It works independently of branches, meaning you can use it in any branch, although it is primarily tested and intended for use on the master branch.
+With intuitive commands and clever automation, GitMini simplifies common Git tasks, allowing developers to focus on coding rather than managing their repositories.
+GitMini doesn't replace Git or remove any of its functionalities; it just provides a simplified way to interact with it. 
 
-GitMini revolves around the concept of Tickets, which are commonly used to organize and track work progress in Software Development.
-
+Say goodbye to complex Git commands and hello to productivity!
 
 
 ## Usage
@@ -89,15 +89,15 @@ Returns the name of the current ticket you're working on, in case your forgot. M
 
 ## Install: 
 
-Requirements: git must be installed
+Requirements: Git must be installed
 
 1. Open a terminal or command prompt.
-2. Run the following command to install the package:
+2. Run the following command to install GitMini:
 ```bash
 npm install gitmini -g
 ```
-That's it! You have added the aliases to your Git configuration. You can now use these commands in your repositories.
-And you can also use them with only 2 letters: `gm` which of corse stands for GitMini.
+That's it! You can now use the new commands in your repositories.
+And you can also use them with only 2 letters: `gm` which stands for GitMini.
 
 ## Examples: 
 
