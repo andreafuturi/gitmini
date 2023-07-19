@@ -1,12 +1,14 @@
 {
   "name": "gitmini",
-  "version": "0.0.21",
+  "version": "0.1.0",
   "description": "Minimal automated approach to GIT (git publish, git unpublish)",
   "bin": {
-    "gm": "bin/index.sh"
+    "gm": "bin/gitmini.sh",
+    "gitmini": "bin/gitmini.sh"
   },
   "scripts": {
-    "postinstall": "git config --global alias.publish '!gm publish' && git config --global alias.unpublish '!gm unpublish' && git config --global alias.start '!gm start' && git config --global alias.refresh '!gm refresh' && git config --global alias.current '!gm current'"
+    "test": "bin/test.sh",
+    "postinstall": "gitmini install"
   },
   "repository": {
     "type": "git",
@@ -22,5 +24,5 @@
   "bugs": {
     "url": "https://github.com/andreafuturi/gitmini/issues"
   },
-  "homepage": "https://github.com/andreafuturi/gitmini#readme"
+  "homepage": "https://www.npmjs.com/package/gitmini"
 }
