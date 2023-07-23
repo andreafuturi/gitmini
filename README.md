@@ -65,7 +65,7 @@ The git start command starts or resumes work done in a ticket. It performs the f
 git rename "old_ticket_name/number" "new_ticket_name/number"
 ```
 
-Rename a ticket, its branch, and commits from the old ticket name to the new ticket name. Useful for updating ticket names to better reflect content or for other reasons. Please communicate changes with the team to avoid confusion.
+Rename a ticket, its branch, and commits from the old ticket name to the new ticket name. Useful for updating ticket names to better reflect content or for other reasons. Please communicate changes with the team to avoid confusion. If you use it with only one paramerter it will rename the current ticket to the provided one.
 
 ```bash
 git combine <ticket_name_1> <ticket_name_2> ...
@@ -135,7 +135,11 @@ Requirements: Git must be installed
 ```bash
 npm install gitmini -g
 ```
+or if needed 
 
+```bash
+sudo npm install gitmini -g
+```
 or download and launch gitmini.sh in the terminal (do not delete it after installed)
 
 That's it! You can now use the new commands in your repositories.
