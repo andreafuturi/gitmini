@@ -6,6 +6,9 @@ GitMini is a powerful tool that simplify the way you use Git.
 It revolves around the concept of tickets, which are commonly used to organize and track work progress in Software Development.
 
 GitMini doesn't replace Git; it enhances it by automating repetitive tasks, allowing you to focus on what truly matters: writing code.
+It provides a simple set of commands that are intuitive also for people new to Version Control.
+
+No more "Hint: You have divergent branches and need to specify how to reconcile them.", no more ""
 
 ## Usage
 
