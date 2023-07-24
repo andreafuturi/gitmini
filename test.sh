@@ -200,8 +200,7 @@ test_publish() {
     git add -A
     gitmini publish feature-789
     # Verify that changes are pushed to the remote repository and merged into the master branch
-    git checkout main
-    
+    git checkout main    
     #current commit message
     commit_message=$(git log -1 --pretty=%B)
     expected_commit_message="feature-789"

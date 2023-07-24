@@ -598,7 +598,8 @@ install() {
   commands=("publish" "unpublish" "start" "refresh" "current" "pause" "combine" "update" "list" "rename" "delete")
 
   for cmd in "${commands[@]}"; do
-    git config --global "alias.$cmd" "!$0 $cmd"
+  #  git config --global "alias.$cmd" "!$0 $cmd"
+  git config --global "alias.$cmd" "!gitmini $cmd"
   done
 
 echo -e "\033[0;32mGitMini installed successfully.${NC}"
@@ -610,4 +611,3 @@ if [[ $# -eq 0 ]]; then
 else
   "$@"
 fi
-

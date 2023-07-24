@@ -1,6 +1,6 @@
 {
   "name": "gitmini",
-  "version": "0.1.3",
+  "version": "0.1.33",
   "description": "Minimal automated approach to GIT (git publish, git unpublish)",
   "bin": {
     "gm": "gitmini.sh",
