@@ -14,7 +14,7 @@ Automatic merge failed; fix conflicts and then commit the result."
 Just a simple and intuitive interface
 
 
-<img src="https://i.imgur.com/9JZDDCg.png" alt="git meme" width="300px" height="auto">
+<img src="https://i.imgur.com/vTsgtog.png" alt="git meme" width="600px" height="auto">
 
 ## Usage
 
