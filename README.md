@@ -8,7 +8,13 @@ It revolves around the concept of tickets, which are commonly used to organize a
 GitMini doesn't replace Git; it enhances it by automating repetitive tasks, allowing you to focus on what truly matters: writing code.
 It provides a simple set of commands that are intuitive also for people new to Version Control.
 
-No more "Hint: You have divergent branches and need to specify how to reconcile them.", no more ""
+No more: "Hint: You have divergent branches and need to specify how to reconcile them."
+No more: "CONFLICT (content): Merge conflict in <file>
+Automatic merge failed; fix conflicts and then commit the result."
+Just a simple and intuitive interface
+
+
+<img src="https://i.imgur.com/9JZDDCg.png" alt="git meme" width="300px" height="auto">
 
 ## Usage
 
