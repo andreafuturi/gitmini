@@ -163,26 +163,49 @@ test_publish() {
 
     # Verify that changes are pushed to the remote repository and merged into the master branch
     git checkout main
-    git pull
     commit_message=$(git log -1 --pretty=%B)
     expected_commit_message="feature-123"
     assert "$expected_commit_message" "$commit_message" "publish should push changes to remote and merge into master"
 
     gitmini start feature-456
-    git status
 
     # Make some changes in the feature branch
     echo "branch feature changes" > feature_changes2.txt
-    git status
+
     # Call the publish function with a specific ticket
     gitmini publish feature-456
-    git status
+
     # Verify that changes are pushed to the remote repository and merged into the master branch
     git checkout main
+
     #current commit message
     commit_message=$(git log -1 --pretty=%B)
     expected_commit_message="feature-456"
     assert "$expected_commit_message" "$commit_message" "publish should push changes from the specified ticket branch to remote and merge into master"
+
+    gitmini start feature-789
+
+    gitmini pause
+
+    #Make some conflicting changes in the master
+    echo "branch master changes" > conflict.txt
+
+    git switch feature-789
+
+    # Make some changes in the feature branch
+    echo "branch feature changes" > conflict.txt
+
+    # Call the publish function with a specific ticket
+    gitmini publish feature-789 &>/dev/null
+    git add -A
+    gitmini publish feature-789
+    # Verify that changes are pushed to the remote repository and merged into the master branch
+    git checkout main
+    
+    #current commit message
+    commit_message=$(git log -1 --pretty=%B)
+    expected_commit_message="feature-789"
+    assert "$expected_commit_message" "$commit_message" "publish should push changes from the specified ticket branch to remote and merge into master after conflicts resolving"
     
     cleanup_test_repository
 }

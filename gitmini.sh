@@ -54,10 +54,9 @@ master_name=$(get_master_name)
 
 publish() {
     current_ticket=${1:-$(get_current_ticket)}
-
+    ticket=$(echo "$1" | tr ' ' '-')
     # Get ticket name if provided; otherwise, use the current ticket
     if [[ -n "$1" ]]; then
-        ticket=$(echo "$1" | tr ' ' '-')
         # If the current ticket is not the same as the one provided, start the provided ticket
         #if provided ticket doesn't correspond to existing branch name didn't exist print Creating one...
         if ! git show-ref --quiet --verify refs/heads/"$ticket"; then
@@ -176,7 +175,7 @@ start() {
         fi
         # update codebase
         start_eco
-        echo -e "${BLUE}GitMini${NC} | ${GREEN}Work on \"$ticket\" \"$message_verb\" successfully.${NC}"
+        echo -e "${BLUE}GitMini${NC} | ${GREEN}Work on \"$ticket\" $message_verb successfully.${NC}"
         end_eco
         # update codebase /may be better to be before creating the branch?
     fi
@@ -247,6 +246,7 @@ update() {
 #
 # Usage: refresh
 refresh() {
+    start_eco
     # Get the current ticket name
     current_ticket=$(get_current_ticket)
 
@@ -339,32 +339,32 @@ combine() {
     end_eco
 }
 
-# Function: git_delete
+# Function: delete
 #
-# Delete the specified branch.
-# Checks if the branch exists and is not the current branch before deleting.
+# Delete the specified ticket branches.
+# Checks if the branches exist and are not the current branch before deleting.
 #
-# Usage: git_delete branch_name
+# Usage: delete [ticket_name1] [ticket_name2] ... [ticket_name_n]
 
 delete() {
-    ticket=${1:-$(get_current_ticket)}
-
-    # Check if the ticket exists
-    if ! git show-ref --quiet --verify refs/heads/"$ticket"; then
-        start_eco
-        echo -e "${BLUE}GitMini${NC} | ${RED}Ticket \"$ticket\" does not exist.${NC}"
-        end_eco
-        exit 1
-    fi
-
-    pause "$ticket"
-
-    # Delete the branch
-    git branch -d "$ticket" &>/dev/null
-
-    start_eco
-    echo -e "${BLUE}GitMini${NC} | ${GREEN}Ticket \"$ticket\" deleted successfully.${NC}"
-    end_eco
+    #in future we will have to check if ticket has been published before deleting otherwise ask confirmation (maybe unless an option is provided --force)
+    for ticket in "$@"; do
+        # Check if the ticket exists
+        if git show-ref --quiet --verify refs/heads/"$ticket"; then
+            # If the ticket is in progress, pause it before deleting
+            if [ "$(get_current_ticket)" = "$ticket" ]; then
+                pause "$ticket"
+            fi
+            git branch -D "$ticket" &>/dev/null
+            start_eco
+            echo -e "${BLUE}GitMini${NC} | ${GREEN}Ticket \"$ticket\" deleted successfully.${NC}"
+            end_eco
+        else
+            start_eco
+            echo -e "${BLUE}GitMini${NC} | ${RED}\"$ticket\" does not exist.${NC}"
+            end_eco
+        fi
+    done
 }
 
 # Function: get_current_ticket
@@ -447,6 +447,7 @@ show_conflicts() {
             echo -e "${BLUE}GitMini${NC} | ${GREEN}Conflicts resolved successfully.${NC}"
             end_eco
             git add -A &>/dev/null
+            git rebase --continue &>/dev/null
         fi
 }
 
@@ -461,7 +462,7 @@ list() {
    ticket_branches=$(git branch --list | grep -v $master_name)
     if [ -z "$ticket_branches" ]; then
         start_eco
-        echo -e "${BLUE}GitMini${NC} | No ticket branches found."
+        echo -e "${BLUE}GitMini${NC} | No tickets found. Create one with git start <ticket_name>"
         end_eco
     else
         start_eco
