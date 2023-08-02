@@ -14,7 +14,6 @@ No more: "CONFLICT (content): Merge conflict in <file>
 Automatic merge failed; fix conflicts and then commit the result."
 Just a simple and intuitive interface
 
-
 <img src="https://i.imgur.com/vTsgtog.png" alt="git meme" width="600px" height="auto">
 
 ## Usage
@@ -144,7 +143,8 @@ Open a terminal and run the following command:
 ```bash
 npm install gitmini -g
 ```
-or if needed 
+
+or if needed
 
 ```bash
 sudo npm install gitmini -g
