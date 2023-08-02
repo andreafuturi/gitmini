@@ -1,10 +1,12 @@
 #!/bin/sh
 
+initial_branch="main"
+
 # Function to create a test Git repository
 setup_test_repository() {
     mkdir test-repo
     cd test-repo || return
-    git init
+    git init --initial-branch="$initial_branch"
     echo "Initial commit" > README.md
     git add README.md
     git commit -m "Initial commit"
@@ -12,7 +14,7 @@ setup_test_repository() {
 
 # Function to cleanup the test Git repository
 cleanup_test_repository() {
-    cd .. || return
+    # cd .. || return
     rm -rf test-repo
 }
 
@@ -23,7 +25,7 @@ test_pause() {
     git checkout -b feature-123
     gitmini pause
     current_branch="$(git symbolic-ref --short HEAD)"
-    assert "main" "$current_branch" "pause should switch back to the master branch"
+    assert "$initial_branch" "$current_branch" "pause should switch back to the master branch"
     cleanup_test_repository
 }
 
@@ -33,7 +35,7 @@ test_start() {
     # rm -rf .git # Remove the Git repository
     # gitmini start new-feature
     # # Assert that the Git repository is initialized
-    # assert "Reinitialized empty Git repository in" "$(git init)" "start should initialize a new Git repository if one doesn't exist"
+    # assert "Reinitialized empty Git repository in" "$(git init --initial-branch="$initial_branch")" "start should initialize a new Git repository if one doesn't exist"
 
     gitmini start feature-123
     current_branch="$(git symbolic-ref --short HEAD)"
@@ -45,7 +47,7 @@ test_start() {
     assert "feature-456" "$current_branch" "start should switch create a new branch and switch to it"
 
     #switiching to master i should be able to than resume any work on the ticket
-    git checkout main
+    git checkout "$initial_branch"
     gitmini start feature-123
     current_branch="$(git symbolic-ref --short HEAD)"
     assert "feature-123" "$current_branch" "start should switch to already existing branch if it exists"
@@ -90,7 +92,7 @@ test_refresh() {
     git checkout -b feature-123
 
     # Make a commit in the master branch
-    git checkout main
+    git checkout "$initial_branch"
     echo "Commit in master" > master_commit.txt
     git add master_commit.txt
     git commit -m "Commit in master"
@@ -108,7 +110,7 @@ test_refresh() {
     # Check if the commit from master is present in the feature branch
     commit_message="$(git log -1 --pretty=%B)"
     git status
-    git log
+    git --no-pager log
     expected_commit_message="Commit in master"
     assert "$expected_commit_message" "$commit_message" "refresh should merge changes from master into the feature branch"
 
@@ -128,13 +130,13 @@ test_check_conflicts() {
     git add conflict.txt
     git commit -m "Commit in feature branch"
 
-    git checkout main
+    git checkout "$initial_branch"
     echo "Master branch content" > conflict.txt
     git add conflict.txt
     git commit -m "Commit in master branch"
 
     git checkout feature-123
-    git merge main --no-commit
+    git merge "$initial_branch" --no-commit
 
     # check if check_conflicts block execution waiting for user input
     output="$(gitmini check_conflicts testing)" >/dev/null 2>&1
@@ -161,7 +163,7 @@ test_publish() {
     gitmini publish
 
     # Verify that changes are pushed to the remote repository and merged into the master branch
-    git checkout main
+    git checkout "$initial_branch"
     commit_message="$(git log -1 --pretty=%B)"
     expected_commit_message="feature-123"
     assert "$expected_commit_message" "$commit_message" "publish should push changes to remote and merge into master"
@@ -175,7 +177,7 @@ test_publish() {
     gitmini publish feature-456
 
     # Verify that changes are pushed to the remote repository and merged into the master branch
-    git checkout main
+    git checkout "$initial_branch"
 
     #current commit message
     commit_message="$(git log -1 --pretty=%B)"
@@ -199,7 +201,7 @@ test_publish() {
     git add -A
     gitmini publish feature-789
     # Verify that changes are pushed to the remote repository and merged into the master branch
-    git checkout main
+    git checkout "$initial_branch"
     #current commit message
     commit_message="$(git log -1 --pretty=%B)"
     expected_commit_message="feature-789"
@@ -224,7 +226,7 @@ test_unpublish() {
     gitmini unpublish
 
     # Verify that changes are reverted
-    git checkout main
+    git checkout "$initial_branch"
     commit_message="$(git log -1 --pretty=%B)"
     expected_commit_message="revert of feature-123"
     assert "$expected_commit_message" "$commit_message" "unpublish should revert changes in the master branch"
@@ -235,7 +237,7 @@ test_unpublish() {
     git add feature_changes.txt
     git commit -m "Commit in feature branch"
     gitmini publish
-    git checkout main
+    git checkout "$initial_branch"
     gitmini unpublish feature-456
     commit_message="$(git log -1 --pretty=%B)"
     expected_commit_message="revert of feature-456"
