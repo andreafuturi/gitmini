@@ -596,26 +596,9 @@ EOF
     # printf "${BLUE}%s${NC} | For more information, visit\n" "$APPLICATION_NAME"
 }
 
-# Function: install
-#
-# Install GitMini by setting up global aliases for the exposed commands.
-#
-# Usage: install
-
-install() {
-    commands="publish unpublish start refresh current pause combine update list rename delete"
-
-    for cmd in $commands; do
-        #  git config --global "alias.$cmd" "!$0 $cmd"
-        git config --global "alias.$cmd" "!gitmini $cmd"
-    done
-
-    printf "${GREEN}%s installed successfully.${NC}\n" "$APPLICATION_NAME"
-}
-
-# Invoke the appropriate function based on the command or install GitMini
-if [ $# -eq 0 ]; then
-    install
+# Invoke the appropriate function based on the command
+if [ "$#" -eq 0 ] || [ "$1" = "-h" ] || [ "$2" = "--help" ]; then
+    help
 else
     "$@"
 fi
