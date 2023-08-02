@@ -14,7 +14,6 @@ No more: "CONFLICT (content): Merge conflict in <file>
 Automatic merge failed; fix conflicts and then commit the result."
 Just a simple and intuitive interface
 
-
 <img src="https://i.imgur.com/vTsgtog.png" alt="git meme" width="600px" height="auto">
 
 ## Usage
@@ -142,11 +141,13 @@ Requirements: Git must be installed
 ```bash
 npm install gitmini -g
 ```
-or if needed 
+
+or if needed
 
 ```bash
 sudo npm install gitmini -g
 ```
+
 or download and launch gitmini.sh in the terminal (do not delete it after installed)
 
 That's it! You can now use the new commands in your repositories.

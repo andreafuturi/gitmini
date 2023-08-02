@@ -69,14 +69,14 @@ publish() {
             echo -e "${BLUE}GitMini${NC} | Pausing ${current_ticket} and resuming ${ticket} work..."
             end_eco
         fi
-        start "$1"
+        start "$ticket"
     else
         if [ -z "$current_ticket" ]; then
             # Start a ticket if none is started and no ticket name is provided
             start_eco
             echo -e "${BLUE}GitMini${NC} | Creating ticket on the fly..."
             end_eco
-            start "$1"
+            start "$ticket"
         fi
         ticket="$(get_current_ticket)"
     fi
