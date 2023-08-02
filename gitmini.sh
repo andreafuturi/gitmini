@@ -17,30 +17,30 @@ APPLICATION_NAME="GitMini"
 # Usage: get_master_name
 
 get_master_name() {
-  if git remote show origin >/dev/null 2>&1; then
-    default_branch="$(git remote show origin | awk '/HEAD branch/ {print $NF}')"
-    echo "$default_branch"
-  else
-    # Check if local master branch exists
-    if git show-ref --quiet --verify refs/heads/master; then
-      echo "master"
-      return
-    fi
+    if git remote show origin >/dev/null 2>&1; then
+        default_branch="$(git remote show origin | awk '/HEAD branch/ {print $NF}')"
+        echo "$default_branch"
+    else
+        # Check if local master branch exists
+        if git show-ref --quiet --verify refs/heads/master; then
+            echo "master"
+            return
+        fi
 
-    # Check if local main branch exists
-    if git show-ref --quiet --verify refs/heads/main; then
-      echo "main"
-      return
-    fi
+        # Check if local main branch exists
+        if git show-ref --quiet --verify refs/heads/main; then
+            echo "main"
+            return
+        fi
 
-    # Check if local default branch exists (Git versions >= 2.28)
-    if git show-ref --quiet --verify refs/heads/default; then
-      echo "default"
-      return
+        # Check if local default branch exists (Git versions >= 2.28)
+        if git show-ref --quiet --verify refs/heads/default; then
+            echo "default"
+            return
+        fi
+        git checkout -b master >/dev/null 2>&1
+        echo "master"
     fi
-    git checkout -b master >/dev/null 2>&1
-    echo "master"
-  fi
 }
 
 #save master name as global var
@@ -238,9 +238,6 @@ update() {
     end_eco
 }
 
-
-
-
 # Function: refresh
 #
 # Refresh the local repository by pulling changes from the current ticket branch and the master branch.
@@ -297,12 +294,9 @@ refresh() {
 #
 # Usage: combine [ticket_name_1] [ticket_name_2] ... [ticket_name_n]
 
-
 #work in progress (not tested)
 
-
 combine() {
-
     # Ensure that at least two ticket names are provided
     #default first ticket name should be the current one if only one ticket name is provided
     #otherwise combine the given tickets name normally
@@ -393,9 +387,9 @@ get_current_ticket() {
 current() {
     current_ticket="$(get_current_ticket)"
     if [ -n "$current_ticket" ]; then
-            start_eco
-            printf "${BLUE}%s${NC} | You are currently working on ticket: ${BLUE}%s${NC}\n" "$APPLICATION_NAME" "$current_ticket"
-            end_eco
+        start_eco
+        printf "${BLUE}%s${NC} | You are currently working on ticket: ${BLUE}%s${NC}\n" "$APPLICATION_NAME" "$current_ticket"
+        end_eco
     else
         start_eco
         printf "${BLUE}%s${NC} | You didn't start any ticket.\n" "$APPLICATION_NAME"
@@ -427,33 +421,32 @@ check_conflicts() {
 
 show_conflicts() {
     conflict_files="$(git diff --check)"
-     start_eco
-        printf "${BLUE}%s${NC} | ${ORANGE}Please fix conflicts in the following files:${NC}\n" "$APPLICATION_NAME"
-        end_eco
-        start_eco
-        echo "$conflict_files"
-        end_eco
-        start_eco
-        printf "After testing everything again, press Enter to continue..."
-        read -r __
-        end_eco
-        # Check for conflicts again after testing
-        #checks conflicts with more strategies
-        conflict_files="$(git diff --check)"
+    start_eco
+    printf "${BLUE}%s${NC} | ${ORANGE}Please fix conflicts in the following files:${NC}\n" "$APPLICATION_NAME"
+    end_eco
+    start_eco
+    echo "$conflict_files"
+    end_eco
+    start_eco
+    printf "After testing everything again, press Enter to continue..."
+    read -r __
+    end_eco
+    # Check for conflicts again after testing
+    #checks conflicts with more strategies
+    conflict_files="$(git diff --check)"
 
-
-        if [ -n "$conflict_files" ]; then
-            start_eco
-            printf "${BLUE}%s${NC} | ${RED}There are still conflicts! Please remember to save files try again.${NC}\n" "$APPLICATION_NAME"
-            end_eco
-            check_conflicts
+    if [ -n "$conflict_files" ]; then
+        start_eco
+        printf "${BLUE}%s${NC} | ${RED}There are still conflicts! Please remember to save files try again.${NC}\n" "$APPLICATION_NAME"
+        end_eco
+        check_conflicts
         else
-            start_eco
-            printf "${BLUE}%s${NC} | ${GREEN}Conflicts resolved successfully.${NC}\n" "$APPLICATION_NAME"
-            end_eco
-            git add -A >/dev/null 2>&1
-            git rebase --continue >/dev/null 2>&1
-        fi
+        start_eco
+        printf "${BLUE}%s${NC} | ${GREEN}Conflicts resolved successfully.${NC}\n" "$APPLICATION_NAME"
+        end_eco
+        git add -A >/dev/null 2>&1
+        git rebase --continue >/dev/null 2>&1
+    fi
 }
 
 # Function: git_list
@@ -464,7 +457,7 @@ show_conflicts() {
 # Usage: git list
 
 list() {
-   ticket_branches="$(git branch --list | grep -v "$master_name")"
+    ticket_branches="$(git branch --list | grep -v "$master_name")"
     if [ -z "$ticket_branches" ]; then
         start_eco
         printf "${BLUE}%s${NC} | No tickets found. Create one with git start <ticket_name>\n" "$APPLICATION_NAME"
@@ -567,6 +560,7 @@ start_eco() {
 end_eco() {
     printf "\n========================================\n"
 }
+
 # Function: help
 #
 # Display the help message.
@@ -609,19 +603,19 @@ EOF
 # Usage: install
 
 install() {
-  commands="publish unpublish start refresh current pause combine update list rename delete"
+    commands="publish unpublish start refresh current pause combine update list rename delete"
 
-  for cmd in $commands; do
-  #  git config --global "alias.$cmd" "!$0 $cmd"
-  git config --global "alias.$cmd" "!gitmini $cmd"
-  done
+    for cmd in $commands; do
+        #  git config --global "alias.$cmd" "!$0 $cmd"
+        git config --global "alias.$cmd" "!gitmini $cmd"
+    done
 
-printf "${GREEN}%s installed successfully.${NC}\n" "$APPLICATION_NAME"
+    printf "${GREEN}%s installed successfully.${NC}\n" "$APPLICATION_NAME"
 }
 
 # Invoke the appropriate function based on the command or install GitMini
 if [ $# -eq 0 ]; then
-  install
+    install
 else
-  "$@"
+    "$@"
 fi
