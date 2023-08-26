@@ -299,7 +299,7 @@ refresh() {
         start_eco
         printf "${BLUE}%s${NC} | Refreshing code...\n" "$APPLICATION_NAME"
         end_eco
-    }
+    }ririririi
 
     if [ -z "$1" ]; then
         # If no parameter is provided, perform a single refresh
