@@ -136,7 +136,9 @@ Shows all the commands with descriptions
 
 Requirements: Git must be installed
 
-1. Open a terminal and run the following command:
+### Npm
+
+Open a terminal and run the following command:
 
 ```bash
 npm install gitmini -g
@@ -148,7 +150,18 @@ or if needed
 sudo npm install gitmini -g
 ```
 
-or download and launch gitmini.sh in the terminal (do not delete it after installed)
+### Makefile
+
+install:
+
+```bash
+make install
+```
+uninstall:
+
+```bash
+make uninstall
+```
 
 That's it! You can now use the new commands in your repositories.
 And you can also use them with only 2 letters: `gitmini` or `gm`.

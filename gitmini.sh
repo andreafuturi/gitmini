@@ -1,11 +1,13 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 # COLORS FOR OUTPUT
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
-ORANGE='\033[0;33m'
 RED='\033[0;31m'
 GREEN='\033[0;32m'
+ORANGE='\033[0;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+APPLICATION_NAME="GitMini"
 
 # Function: get_master_name
 #
@@ -15,34 +17,34 @@ GREEN='\033[0;32m'
 # Usage: get_master_name
 
 get_master_name() {
-  if git remote show origin >/dev/null 2>&1; then
-    default_branch=$(git remote show origin | awk '/HEAD branch/ {print $NF}')
-    echo "$default_branch"
-  else
-    # Check if local master branch exists
-    if git show-ref --quiet --verify refs/heads/master; then
-      echo "master"
-      return
-    fi
+    if git remote show origin >/dev/null 2>&1; then
+        default_branch="$(git remote show origin | awk '/HEAD branch/ {print $NF}')"
+        echo "$default_branch"
+    else
+        # Check if local master branch exists
+        if git show-ref --quiet --verify refs/heads/master; then
+            echo "master"
+            return
+        fi
 
-    # Check if local main branch exists
-    if git show-ref --quiet --verify refs/heads/main; then
-      echo "main"
-      return
-    fi
+        # Check if local main branch exists
+        if git show-ref --quiet --verify refs/heads/main; then
+            echo "main"
+            return
+        fi
 
-    # Check if local default branch exists (Git versions >= 2.28)
-    if git show-ref --quiet --verify refs/heads/default; then
-      echo "default"
-      return
+        # Check if local default branch exists (Git versions >= 2.28)
+        if git show-ref --quiet --verify refs/heads/default; then
+            echo "default"
+            return
+        fi
+        git checkout -b master >/dev/null 2>&1
+        echo "master"
     fi
-    git checkout -b master &>/dev/null
-    echo "master"
-  fi
 }
 
 #save master name as global var
-master_name=$(get_master_name)
+master_name="$(get_master_name)"
 
 # Function: publish
 #
@@ -53,20 +55,20 @@ master_name=$(get_master_name)
 # Usage: publish [ticket_name]
 
 publish() {
-    current_ticket=${1:-$(get_current_ticket)}
-    ticket=$(echo "$1" | tr ' ' '-')
+    current_ticket="${1:-$(get_current_ticket)}"
+    ticket="$(echo "$1" | tr ' ' '-')"
     # Get ticket name if provided; otherwise, use the current ticket
-    if [[ -n "$1" ]]; then
+    if [ -n "$1" ]; then
         # If the current ticket is not the same as the one provided, start the provided ticket
         #if provided ticket doesn't correspond to existing branch name didn't exist print Creating one...
         if ! git show-ref --quiet --verify refs/heads/"$ticket"; then
             start_eco
-            echo -e "${BLUE}GitMini${NC} | Creating ticket on the fly..."
+            printf "${BLUE}%s${NC} | Creating ticket on the fly...\n" "$APPLICATION_NAME"
             end_eco
         fi
-        if [[ "$ticket" != "$current_ticket" ]]; then
+        if [ "$ticket" != "$current_ticket" ]; then
             start_eco
-            echo -e "${BLUE}GitMini${NC} | Pausing ${current_ticket} and resuming ${ticket} work..."
+            printf "${BLUE}%s${NC} | Pausing %s and resuming %s work...\n" "$APPLICATION_NAME" "$current_ticket" "$ticket"
             end_eco
         fi
         start "$ticket"
@@ -74,15 +76,15 @@ publish() {
         if [ -z "$current_ticket" ]; then
             # Start a ticket if none is started and no ticket name is provided
             start_eco
-            echo -e "${BLUE}GitMini${NC} | Creating ticket on the fly..."
+            printf "${BLUE}%s${NC} | Creating ticket on the fly...\n" "$APPLICATION_NAME"
             end_eco
             start "$ticket"
         fi
         ticket="$(get_current_ticket)"
     fi
-    update "$ticket" &>/dev/null
+    update "$ticket" >/dev/null 2>&1
     start_eco
-    echo -e "${BLUE}GitMini${NC} | ${GREEN}Work on \"$ticket\" published successfully.${NC}"
+    printf "${BLUE}%s${NC} | ${GREEN}Work on \"%s\" published successfully.${NC}\n" "$APPLICATION_NAME" "$ticket"
     end_eco
 }
 
@@ -97,36 +99,36 @@ unpublish() {
     # Safely update your local repository
     refresh
 
-    current_ticket=$(get_current_ticket)
-    if [[ -z "$1" && -z "$current_ticket" ]]; then
+    current_ticket="$(get_current_ticket)"
+    if [ -z "$1" ] && [ -z "$current_ticket" ]; then
         ticket="$(git log -1 --pretty=%B)"
     else
-        ticket=${1:-$current_ticket}
+        ticket="${1:-$current_ticket}"
     fi
 
-    git checkout "$master_name" &>/dev/null
+    git checkout "$master_name" >/dev/null
 
     # Find the commit with the matching ticket name
-    commit_hash=$(git log --grep="$ticket" --pretty=format:%H -n 1)
+    commit_hash="$(git log --grep="$ticket" --pretty=format:%H -n 1)"
 
-    if [[ -z $commit_hash ]]; then
+    if [ -z "$commit_hash" ]; then
         start_eco
-        echo "${BLUE}GitMini${NC} | ${RED}No ticket created with the name \"$ticket\".${NC}"
+        printf "${BLUE}%s${NC} | ${RED}No ticket created with the name \"%s\".${NC}" "$APPLICATION_NAME" "$ticket"
         end_eco
         exit 1
     fi
 
     # Revert the commit
-    git revert --no-commit "$commit_hash" &>/dev/null
+    git revert --no-commit "$commit_hash" >/dev/null 2>&1
 
     # Check for conflicts after reverting
     check_conflicts
-    git add -A &>/dev/null
+    git add -A >/dev/null 2>&1
 
     # Create a revert commit with the ticket name
-    git commit -m "revert of $ticket" && git push &>/dev/null
+    git commit -m "revert of $ticket" && git push >/dev/null 2>&1
     start_eco
-    echo -e "${BLUE}GitMini${NC} | ${GREEN}Unpublishing of \"$ticket\" completed successfully.${NC}"
+    printf "${BLUE}%s${NC} | ${GREEN}Unpublishing of \"%s\" completed successfully.${NC}\n" "$APPLICATION_NAME" "$ticket"
     end_eco
 }
 
@@ -139,43 +141,43 @@ unpublish() {
 
 start() {
     init_userinfo
-    if [[ ! -d .git ]]; then
+    if [ ! -d .git ]; then
         start_eco
-        echo -e "${BLUE}GitMini${NC} | Repository not found. Initializing a new one..."
+        printf "${BLUE}%s${NC} | Repository not found. Initializing a new one...\n" "$APPLICATION_NAME"
         end_eco
-        git init &>/dev/null
+        git init >/dev/null 2>&1
         #make first repo commit
         #create readme
-        echo "#Created with GitMini" >> README.md
-        git add -A &>/dev/null
-        git commit -m "first commit" &>/dev/null
-        master_name=$(get_master_name) #update master name
+        echo "#Created with $APPLICATION_NAME" >> README.md
+        git add -A >/dev/null 2>&1
+        git commit -m "first commit" >/dev/null 2>&1
+        master_name="$(get_master_name)" #update master name
     fi
 
-    ticket=${1:-"WIP-$(date +%d-%m-%Y-%H-%M-%S)"}
+    ticket="${1:-WIP-$(date +%d-%m-%Y-%H-%M-%S)}"
     # Replace spaces with dashes in the ticket name
-    ticket=${ticket// /-}
-    existing_current_ticket=$(get_current_ticket)
+    ticket="$(echo "$ticket" | sed 's/ /-/g')"
+    existing_current_ticket="$(get_current_ticket)"
     # if another ticket is in progress, pause it
-    if [[ "$ticket" == "$existing_current_ticket" ]]; then
+    if [ "$ticket" = "$existing_current_ticket" ]; then
         start_eco
-        echo -e "${BLUE}GitMini${NC} | ${ORANGE}Work on \"$ticket\" $message_verb already started.${NC}"
+        printf "${BLUE}%s${NC} | ${ORANGE}Work on \"%s\" %s already started.${NC}\n" "$APPLICATION_NAME" "$ticket" "$message_verb"
         end_eco
     else
-        if [[ -n "$existing_current_ticket" && "$ticket" != "$existing_current_ticket" ]]; then
+        if [ -n "$existing_current_ticket" ] && [ "$ticket" != "$existing_current_ticket" ]; then
             pause "$existing_current_ticket"
         fi
         # create a new branch for the ticket
         if git show-ref --quiet --verify refs/heads/"$ticket"; then
-            git checkout "$ticket" &>/dev/null
+            git checkout "$ticket" >/dev/null 2>&1
             message_verb="resumed"
         else
-            git checkout -b "$ticket" &>/dev/null
+            git checkout -b "$ticket" >/dev/null 2>&1
             message_verb="started"
         fi
         # update codebase
         start_eco
-        echo -e "${BLUE}GitMini${NC} | ${GREEN}Work on \"$ticket\" $message_verb successfully.${NC}"
+        printf "${BLUE}%s${NC} | ${GREEN}Work on \"%s\" %s successfully.${NC}\n" "$APPLICATION_NAME" "$ticket" "$message_verb"
         end_eco
         # update codebase /may be better to be before creating the branch?
     fi
@@ -190,20 +192,20 @@ start() {
 # Usage: pause [ticket_name]
 
 pause() {
-    current_ticket=${1:-$(get_current_ticket)}
+    current_ticket="${1:-$(get_current_ticket)}"
     if [ -z "$current_ticket" ]; then
         start_eco
-        echo -e "${BLUE}GitMini${NC} | ${RED}You didn't start any ticket.${NC}"
+        printf "${BLUE}%s${NC} | ${RED}You didn't start any ticket.${NC}\n" "$APPLICATION_NAME"
         end_eco
         exit 1
     fi
-    git add -A &>/dev/null
-    git commit -m "$current_ticket paused" &>/dev/null
+    git add -A >/dev/null 2>&1
+    git commit -m "$current_ticket paused" >/dev/null 2>&1
 
     # Switch to the master branch
-    git checkout "$master_name" &>/dev/null
+    git checkout "$master_name" >/dev/null 2>&1
     start_eco
-    echo -e "${BLUE}GitMini${NC} | ${GREEN}Work on \"$current_ticket\" paused successfully.${NC}"
+    printf "${BLUE}%s${NC} | ${GREEN}Work on \"%s\" paused successfully.${NC}\n" "$APPLICATION_NAME" "$current_ticket"
     end_eco
 }
 
@@ -216,28 +218,25 @@ pause() {
 
 update() {
     refresh
-    current_ticket=$(get_current_ticket)
+    current_ticket="$(get_current_ticket)"
     start_eco
-    echo -e "${BLUE}GitMini${NC} | Uploading your changes..."
+    printf "${BLUE}%s${NC} | Uploading your changes...\n" "$APPLICATION_NAME"
     end_eco
-    git add -A &>/dev/null
-    git commit -m "${1:-$current_ticket-WIP}" &>/dev/null
-    git push --set-upstream origin &>/dev/null
+    git add -A >/dev/null 2>&1
+    git commit -m "${1:-$current_ticket-WIP}" >/dev/null 2>&1
+    git push --set-upstream origin >/dev/null 2>&1
     # Switch to the master branch and merge changes from the ticket branch with a single commit
-    git checkout "$master_name" &>/dev/null
-    git merge "$ticket" --squash --no-commit &>/dev/null
+    git checkout "$master_name" >/dev/null 2>&1
+    git merge "$ticket" --squash --no-commit >/dev/null 2>&1
     check_conflicts
-    git add -A &>/dev/null
-    git commit -m "${1:-$current_ticket-WIP}" &>/dev/null
+    git add -A >/dev/null
+    git commit -m "${1:-$current_ticket-WIP}" >/dev/null 2>&1
     # Push changes to the master branch
-    git push &>/dev/null
+    git push >/dev/null 2>&1
     start_eco
-    echo -e "${BLUE}GitMini${NC} | ${GREEN}Project updated with \"$ticket\" successfully.${NC}"
+    printf "${BLUE}%s${NC} | ${GREEN}Project updated with \"%s\" successfully.${NC}\n" "$APPLICATION_NAME" "$ticket"
     end_eco
 }
-
-
-
 
 # Function: refresh
 #
@@ -248,43 +247,43 @@ update() {
 refresh() {
     start_eco
     # Get the current ticket name
-    current_ticket=$(get_current_ticket)
+    current_ticket="$(get_current_ticket)"
 
     # Check if there are any changes in the working tree
-    if [[ $(git status --porcelain) ]]; then
+    if [ "$(git status --porcelain)" ]; then
         # Commit changes before pulling
-        git add -A &>/dev/null
-        git commit -m "${current_ticket:-temp-WIP-$(date +%s)}" &>/dev/null
-        git push --set-upstream origin "$current_ticket" &>/dev/null
+        git add -A >/dev/null 2>&1
+        git commit -m "${current_ticket:-temp-WIP-$(date +%s)}" >/dev/null 2>&1
+        git push --set-upstream origin "$current_ticket" >/dev/null 2>&1
     fi
 
     # Pull updates from origin of the current ticket
-    git pull &>/dev/null
+    git pull >/dev/null 2>&1
 
     # Get the commit hash of your current branch's latest commit
-    current_branch_commit=$(git rev-parse HEAD)
+    current_branch_commit="$(git rev-parse HEAD)"
 
     # Get the commit hash of the latest commit on the master branch
-    master_commit=$(git rev-parse "$master_name")
+    master_commit="$(git rev-parse "$master_name")"
 
     if [ "$current_branch_commit" != "$master_commit" ]; then
         # Perform the merge only if it's needed
         start_eco
-        echo -e "${BLUE}GitMini${NC} | Downloading team changes..."
+        printf "${BLUE}%s${NC} | Downloading team changes...\n" "$APPLICATION_NAME"
         end_eco
         # Switch to the master branch and pull updates
-        git checkout "$master_name" &>/dev/null && git pull &>/dev/null
+        git checkout "$master_name" >/dev/null 2>&1 && git pull >/dev/null 2>&1
         # Switch back to the current ticket branch
-        git checkout "$current_ticket" &>/dev/null
+        git checkout "$current_ticket" >/dev/null 2>&1
         # Merge changes from master into the current ticket branch
-        git merge "$master_name" --no-commit &>/dev/null
+        git merge "$master_name" --no-commit >/dev/null 2>&1
         check_conflicts
-        git add -A &>/dev/null
-        git commit -m "$current_ticket update with other tickets" &>/dev/null
+        git add -A >/dev/null 2>&1
+        git commit -m "$current_ticket update with other tickets" >/dev/null 2>&1
     fi
 
     start_eco
-    echo -e "${BLUE}GitMini${NC} | Refreshing code..."
+    printf "${BLUE}%s${NC} | Refreshing code...\n" "$APPLICATION_NAME"
     end_eco
 }
 
@@ -295,47 +294,45 @@ refresh() {
 #
 # Usage: combine [ticket_name_1] [ticket_name_2] ... [ticket_name_n]
 
-
 #work in progress (not tested)
 
-
 combine() {
-
     # Ensure that at least two ticket names are provided
     #default first ticket name should be the current one if only one ticket name is provided
     #otherwise combine the given tickets name normally
     if [ "$#" -lt 2 ]; then
         start_eco
-        echo -e "${BLUE}GitMini${NC} | ${RED}Please provide at least two ticket names to combine.${NC}"
+        printf "${BLUE}%s${NC} | ${RED}Please provide at least two ticket names to combine.${NC}\n" "$APPLICATION_NAME"
         end_eco
         exit 1
     fi
 
     # Prompt the user for the new ticket name
-    read -rp "Enter the name for the combined ticket: " combined_branch
-    combined_branch=${combined_branch// /-}
+    printf "Enter the name for the combined ticket: "
+    read -r combined_branch
+    combined_branch="$(echo "$combined_branch" | sed 's/ /-/g')"
 
     # Create the combined branch
     #pause current ticket if present
     pause
-    git checkout -b "$combined_branch" &>/dev/null
+    git checkout -b "$combined_branch" >/dev/null 2>&1
 
     # Merge each ticket branch into the combined branch
     for ticket_name in "$@"; do
         if git show-ref --quiet --verify refs/heads/"$ticket_name"; then
-            git merge "$ticket_name" --no-commit &>/dev/null
+            git merge "$ticket_name" --no-commit >/dev/null 2>&1
             check_conflicts
-            git add -A &>/dev/null
-            git commit -m "Merging $ticket_name into $combined_branch" &>/dev/null
+            git add -A >/dev/null 2>&1
+            git commit -m "Merging $ticket_name into $combined_branch" >/dev/null 2>&1
         else
             start_eco
-            echo -e "${BLUE}GitMini${NC} | ${RED}\"$ticket_name\" does not exist.${NC}"
+            printf "${BLUE}%s${NC} | ${RED}\"%s\" does not exist.${NC}\n" "$APPLICATION_NAME" "$ticket_name"
             end_eco
         fi
     done
 
     start_eco
-    echo -e "${BLUE}GitMini${NC} | ${GREEN}Tickets merged into \"$combined_branch\" successfully.${NC}"
+    printf "${BLUE}%s${NC} | ${GREEN}Tickets merged into \"%s\" successfully.${NC}\n" "$APPLICATION_NAME" "$combined_branch"
     end_eco
 }
 
@@ -355,13 +352,13 @@ delete() {
             if [ "$(get_current_ticket)" = "$ticket" ]; then
                 pause "$ticket"
             fi
-            git branch -D "$ticket" &>/dev/null
+            git branch -D "$ticket" >/dev/null 2>&1
             start_eco
-            echo -e "${BLUE}GitMini${NC} | ${GREEN}Ticket \"$ticket\" deleted successfully.${NC}"
+            printf "${BLUE}%s${NC} | ${GREEN}Ticket \"%s\" deleted successfully.${NC}\n" "$APPLICATION_NAME" "$ticket"
             end_eco
         else
             start_eco
-            echo -e "${BLUE}GitMini${NC} | ${RED}\"$ticket\" does not exist.${NC}"
+            printf "${BLUE}%s${NC} | ${RED}\"%s\" does not exist.${NC}\n" "$APPLICATION_NAME" "$ticket"
             end_eco
         fi
     done
@@ -375,8 +372,8 @@ delete() {
 # Usage: get_current_ticket
 
 get_current_ticket() {
-    branch=$(git rev-parse --abbrev-ref HEAD)
-    if [[ "$branch" != "$master_name" ]]; then
+    branch="$(git rev-parse --abbrev-ref HEAD)"
+    if [ "$branch" != "$master_name" ]; then
         echo "$branch"
     fi
 }
@@ -388,15 +385,15 @@ get_current_ticket() {
 # Usage: current
 
 current() {
-    current_ticket=$(get_current_ticket)
-    if [[ -n "$current_ticket" ]]; then
-            start_eco
-            echo -e "${BLUE}GitMini${NC} | You are currently working on ticket: ${BLUE}$current_ticket${NC}"
-            end_eco
+    current_ticket="$(get_current_ticket)"
+    if [ -n "$current_ticket" ]; then
+        start_eco
+        printf "${BLUE}%s${NC} | You are currently working on ticket: ${BLUE}%s${NC}\n" "$APPLICATION_NAME" "$current_ticket"
+        end_eco
     else
         start_eco
-        echo -e "${BLUE}GitMini${NC} | You didn't start any ticket."
-        echo -e "${BLUE}GitMini${NC} | Start a new one with git start <ticket_name> or run directly git publish <ticket_name>"
+        printf "${BLUE}%s${NC} | You didn't start any ticket.\n" "$APPLICATION_NAME"
+        printf "${BLUE}%s${NC} | Start a new one with git start <ticket_name> or run directly git publish <ticket_name>\n" "$APPLICATION_NAME"
         end_eco
     fi
 }
@@ -408,12 +405,13 @@ current() {
 #
 # Usage: check_conflicts
 
+# shellcheck disable=SC2120
 check_conflicts() {
-    # conflict_files=$(git grep -l -Ee '<<<<<<<.*(\|\||====|>>>>>>>)')
-    conflict_files=$(git diff --name-only --diff-filter=U)
-    if [[ -n $conflict_files ]]; then
+    # conflict_files="$(git grep -l -Ee '<<<<<<<.*(\|\||====|>>>>>>>)')"
+    conflict_files="$(git diff --name-only --diff-filter=U)"
+    if [ -n "$conflict_files" ]; then
         #if $1 is testing then don't show conflicts echo "conflicts found" else show conflicts
-        if [[ "$1" == "testing" ]]; then
+        if [ "$1" = "testing" ]; then
             echo "conflicts found"
         else
             show_conflicts
@@ -422,33 +420,33 @@ check_conflicts() {
 }
 
 show_conflicts() {
-    conflict_files=$(git diff --check)
-     start_eco
-        echo -e "${BLUE}GitMini${NC} | ${ORANGE}Please fix conflicts in the following files:${NC}"
-        end_eco
-        start_eco
-        echo "$conflict_files"
-        end_eco
-        start_eco
-        read -rp "After testing everything again, press Enter to continue..."
-        end_eco
-        # Check for conflicts again after testing
-        #checks conflicts with more strategies
-        conflict_files=$(git diff --check)
+    conflict_files="$(git diff --check)"
+    start_eco
+    printf "${BLUE}%s${NC} | ${ORANGE}Please fix conflicts in the following files:${NC}\n" "$APPLICATION_NAME"
+    end_eco
+    start_eco
+    echo "$conflict_files"
+    end_eco
+    start_eco
+    printf "After testing everything again, press Enter to continue..."
+    read -r __
+    end_eco
+    # Check for conflicts again after testing
+    #checks conflicts with more strategies
+    conflict_files="$(git diff --check)"
 
-
-        if [[ -n $conflict_files ]]; then
-            start_eco
-            echo -e "${BLUE}GitMini${NC} | ${RED}There are still conflicts! Please remember to save files try again.${NC}"
-            end_eco
-            check_conflicts
+    if [ -n "$conflict_files" ]; then
+        start_eco
+        printf "${BLUE}%s${NC} | ${RED}There are still conflicts! Please remember to save files try again.${NC}\n" "$APPLICATION_NAME"
+        end_eco
+        check_conflicts
         else
-            start_eco
-            echo -e "${BLUE}GitMini${NC} | ${GREEN}Conflicts resolved successfully.${NC}"
-            end_eco
-            git add -A &>/dev/null
-            git rebase --continue &>/dev/null
-        fi
+        start_eco
+        printf "${BLUE}%s${NC} | ${GREEN}Conflicts resolved successfully.${NC}\n" "$APPLICATION_NAME"
+        end_eco
+        git add -A >/dev/null 2>&1
+        git rebase --continue >/dev/null 2>&1
+    fi
 }
 
 # Function: git_list
@@ -459,14 +457,14 @@ show_conflicts() {
 # Usage: git list
 
 list() {
-   ticket_branches=$(git branch --list | grep -v $master_name)
+    ticket_branches="$(git branch --list | grep -v "$master_name")"
     if [ -z "$ticket_branches" ]; then
         start_eco
-        echo -e "${BLUE}GitMini${NC} | No tickets found. Create one with git start <ticket_name>"
+        printf "${BLUE}%s${NC} | No tickets found. Create one with git start <ticket_name>\n" "$APPLICATION_NAME"
         end_eco
     else
         start_eco
-        echo -e "${BLUE}GitMini${NC} | Available ticket branches:"
+        printf "${BLUE}%s${NC} | Available ticket branches:\n" "$APPLICATION_NAME"
         end_eco
         start_eco
         echo "$ticket_branches" | sed 's/^/  - /'  # Add a prefix "-" to each branch name
@@ -487,30 +485,33 @@ rename() {
 
     # If only one argument is provided, assume it's the new ticket name and get the current ticket name
     if [ "$#" -eq 1 ]; then
-        current_ticket=$(get_current_ticket)
+        current_ticket="$(get_current_ticket)"
         new_ticket="$1"
     fi
 
     # Check if the current ticket branch exists
     if ! git show-ref --quiet --verify refs/heads/"$current_ticket"; then
         start_eco
-        echo -e "${BLUE}GitMini${NC} | ${RED}Ticket \"$current_ticket\" does not exist.${NC}"
+        printf "${BLUE}%s${NC} | ${RED}Ticket \"%s\" does not exist.${NC}\n" "$APPLICATION_NAME" "$current_ticket"
         end_eco
         exit 1
     fi
-    git branch -m "$current_ticket" "$new_ticket" &>/dev/null
-    git checkout "$master_name" &>/dev/null
-    git checkout "$new_ticket" &>/dev/null
+    git branch -m "$current_ticket" "$new_ticket" >/dev/null 2>&1
+    git checkout "$master_name" >/dev/null 2>&1
+    git checkout "$new_ticket" >/dev/null 2>&1
 
     #Rename all commits with the new ticket name
-    git filter-branch -f --env-filter "GIT_COMMITTER_NAME='$(git config user.name)'; GIT_COMMITTER_EMAIL='$(git config user.email)'; GIT_AUTHOR_NAME='$(git config user.name)'; GIT_AUTHOR_EMAIL='$(git config user.email)';" --msg-filter 'sed "s/'"$current_ticket"'/'"$new_ticket"'/g"' HEAD &>/dev/null
+    git filter-branch -f \
+        --env-filter "GIT_COMMITTER_NAME='$(git config user.name)'; GIT_COMMITTER_EMAIL='$(git config user.email)'; GIT_AUTHOR_NAME='$(git config user.name)'; GIT_AUTHOR_EMAIL='$(git config user.email)';" \
+        --msg-filter 'sed "s/'"$current_ticket"'/'"$new_ticket"'/g"' \
+        HEAD >/dev/null 2>&1
 
     # Push the new branch to the remote repository
-    git push origin --delete old-branch-name &>/dev/null
-    git push --set-upstream origin "$new_ticket" &>/dev/null
+    git push origin --delete old-branch-name >/dev/null 2>&1
+    git push --set-upstream origin "$new_ticket" >/dev/null 2>&1
 
     start_eco
-    echo -e "${BLUE}GitMini${NC} | ${GREEN}Ticket \"$current_ticket\" renamed to \"$new_ticket\" successfully.${NC}"
+    printf "${BLUE}%s${NC} | ${GREEN}Ticket \"%s\" renamed to \"%s\" successfully.${NC}\n" "$APPLICATION_NAME" "$current_ticket" "$new_ticket"
     end_eco
 }
 
@@ -529,7 +530,8 @@ init_userinfo() {
             git config user.name "$(git config --global user.name)"
         else
             # Prompt the user to enter their name
-            read -rp "Enter your name: " name
+            printf "Enter your name: "
+            read -r name
             # Set the local git username
             git config user.name "$name"
         fi
@@ -543,7 +545,8 @@ init_userinfo() {
             git config user.email "$(git config --global user.email)"
         else
             # Prompt the user to enter their email
-            read -rp "Enter your email: " email
+            printf "Enter your email: "
+            read -r email
             # Set the local git email
             git config user.email "$email"
         fi
@@ -552,12 +555,12 @@ init_userinfo() {
 
 #Text formatting functions
 start_eco() {
-    echo "========================================"
-    echo
+    printf "========================================\n\n"
 }
 end_eco() {
-    echo -e "\n========================================"
+    printf "\n========================================\n"
 }
+
 # Function: help
 #
 # Display the help message.
@@ -566,48 +569,36 @@ end_eco() {
 
 help() {
     start_eco
-    echo -e "${BLUE}GitMini${NC} | Usage: git <command> [ticket_name]"
-    echo -e "${BLUE}GitMini${NC} | Commands:"
-    echo -e " - ${BLUE}start${NC}: Start or resume work on a ticket and refresh codebase."
-    echo -e " - ${BLUE}publish${NC}: Publish the changes made in the current or specified ticket."
-    echo -e " - ${BLUE}unpublish${NC}: Revert the changes made in the current or specified ticket."
-    echo
-    echo -e " - ${BLUE}rename${NC}: Rename a ticket (branch and commits)."
-    echo -e " - ${BLUE}combine${NC}: Combine multiple ticket branches into one branch."
-    echo
-    echo -e " - ${BLUE}list${NC}: List all tickets opened until now."
-    echo -e " - ${BLUE}current${NC}: Display the name of the current ticket being worked on."
-    echo -e " - ${BLUE}pause${NC}: Pause the work on the current ticket by commiting the changes and switching to the master branch."
-    echo
-    echo -e " - ${BLUE}refresh${NC}: Refresh the local repository by downloading changes from the current ticket branch and the master branch."
-    echo -e " - ${BLUE}update${NC}: Update team members with your work even if not finished."
-    echo -e " - ${BLUE}delete${NC}: Delete the specified ticket."
+
+    help_message=$(cat << EOF
+${BLUE}$APPLICATION_NAME${NC} | Usage: git <command> [ticket_name]
+${BLUE}$APPLICATION_NAME${NC} | Commands:
+ - ${BLUE}start${NC}: Start or resume work on a ticket and refresh codebase.
+ - ${BLUE}publish${NC}: Publish the changes made in the current or specified ticket.
+ - ${BLUE}unpublish${NC}: Revert the changes made in the current or specified ticket.
+
+ - ${BLUE}rename${NC}: Rename a ticket (branch and commits).
+ - ${BLUE}combine${NC}: Combine multiple ticket branches into one branch.
+
+ - ${BLUE}list${NC}: List all tickets opened until now.
+ - ${BLUE}current${NC}: Display the name of the current ticket being worked on.
+ - ${BLUE}pause${NC}: Pause the work on the current ticket by commiting the changes and switching to the master branch.
+
+ - ${BLUE}refresh${NC}: Refresh the local repository by downloading changes from the current ticket branch and the master branch.
+ - ${BLUE}update${NC}: Update team members with your work even if not finished.
+ - ${BLUE}delete${NC}: Delete the specified ticket.
+EOF
+    )
+    echo "$help_message"
 
     end_eco
 
-    # echo -e "${BLUE}GitMini${NC} | For more information, visit
+    # printf "${BLUE}%s${NC} | For more information, visit\n" "$APPLICATION_NAME"
 }
 
-# Function: install
-#
-# Install GitMini by setting up global aliases for the exposed commands.
-#
-# Usage: install
-
-install() {
-  commands=("publish" "unpublish" "start" "refresh" "current" "pause" "combine" "update" "list" "rename" "delete")
-
-  for cmd in "${commands[@]}"; do
-  #  git config --global "alias.$cmd" "!$0 $cmd"
-  git config --global "alias.$cmd" "!gitmini $cmd"
-  done
-
-echo -e "\033[0;32mGitMini installed successfully.${NC}"
-}
-
-# Invoke the appropriate function based on the command or install GitMini
-if [[ $# -eq 0 ]]; then
-  install
+# Invoke the appropriate function based on the command
+if [ "$#" -eq 0 ] || [ "$1" = "-h" ] || [ "$2" = "--help" ]; then
+    help
 else
-  "$@"
+    "$@"
 fi
