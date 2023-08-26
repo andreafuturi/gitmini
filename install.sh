@@ -63,11 +63,11 @@ configure_uninstall() {
 }
 
 if [ "$#" -lt 1 ]; then
-    printf "${RED}error: too few parameters: %s, insert action${NC}\n" "$#" >&2
-    exit 1
+    action="install"
+else
+    action="$1"
+    shift 1
 fi
-action="$1"
-shift 1
 
 case "$action" in
     install-aliases)
@@ -76,13 +76,7 @@ case "$action" in
     ;;
 esac
 
-if [ "$#" -lt 1 ]; then
-    printf "${RED}error: too few parameters: %s, insert out-name${NC}\n" "$#" >&2
-    exit 1
-fi
-out_name="$1"
-shift 1
-
+out_name="gitmini.sh"
 if [ ! -e "$out_name" ]; then
     printf "${RED}error: %s does not exists${NC}\n" "$out_name" >&2
     exit 1

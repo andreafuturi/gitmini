@@ -1,7 +1,5 @@
-OUT_NAME = gitmini.sh
-
 install:
-	@./configure.sh install $(OUT_NAME)
+	@./install.sh install
 
 uninstall:
-	@./configure.sh uninstall $(OUT_NAME)
+	@./install.sh uninstall
