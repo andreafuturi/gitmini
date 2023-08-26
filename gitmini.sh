@@ -71,14 +71,14 @@ publish() {
             printf "${BLUE}%s${NC} | Pausing %s and resuming %s work...\n" "$APPLICATION_NAME" "$current_ticket" "$ticket"
             end_eco
         fi
-        start "$1"
+        start "$ticket"
     else
         if [ -z "$current_ticket" ]; then
             # Start a ticket if none is started and no ticket name is provided
             start_eco
             printf "${BLUE}%s${NC} | Creating ticket on the fly...\n" "$APPLICATION_NAME"
             end_eco
-            start "$1"
+            start "$ticket"
         fi
         ticket="$(get_current_ticket)"
     fi
