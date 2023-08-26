@@ -70,27 +70,27 @@ else
 fi
 
 case "$action" in
-    install-aliases)
-        configure_install_aliases
-        exit 0
+install-aliases)
+    configure_install_aliases
+    exit 0
     ;;
 esac
 
-out_name="gitmini.sh"
+out_name="$(dirname "$0")/gitmini.sh"
 if [ ! -e "$out_name" ]; then
     printf "${RED}error: %s does not exists${NC}\n" "$out_name" >&2
     exit 1
 fi
 
 case "$action" in
-    install)
-        configure_install "$out_name"
+install)
+    configure_install "$out_name"
     ;;
-    uninstall)
-        configure_uninstall "$out_name"
+uninstall)
+    configure_uninstall "$out_name"
     ;;
-    *)
-        printf "${RED}error: action %s not recognized${NC}\n" "$action" >&2
-        exit 1
+*)
+    printf "${RED}error: action %s not recognized${NC}\n" "$action" >&2
+    exit 1
     ;;
 esac

@@ -82,7 +82,7 @@ publish() {
         fi
         ticket="$(get_current_ticket)"
     fi
-    update "$ticket" >/dev/null 2>&1
+    update "${ticket} published on ${master_name}" >/dev/null 2>&1
     start_eco
     printf "${BLUE}%s${NC} | ${GREEN}Work on \"%s\" published successfully.${NC}\n" "$APPLICATION_NAME" "$ticket"
     end_eco
@@ -148,7 +148,7 @@ start() {
         git init >/dev/null 2>&1
         #make first repo commit
         #create readme
-        echo "#Created with $APPLICATION_NAME" >> README.md
+        echo "#Created with $APPLICATION_NAME" >>README.md
         git add -A >/dev/null 2>&1
         git commit -m "first commit" >/dev/null 2>&1
         master_name="$(get_master_name)" #update master name
@@ -213,8 +213,9 @@ pause() {
 #
 # Update the current ticket branch with the changes made in the working directory.
 # The updated changes are then merged with the master branch.
+# Useful to give sneak previews to team members of a WIP.
 #
-# Usage: update [ticket_name]
+# Usage: update "update message"
 
 update() {
     refresh
@@ -225,6 +226,7 @@ update() {
     git add -A >/dev/null 2>&1
     git commit -m "${1:-$current_ticket-WIP}" >/dev/null 2>&1
     git push --set-upstream origin >/dev/null 2>&1
+
     # Switch to the master branch and merge changes from the ticket branch with a single commit
     git checkout "$master_name" >/dev/null 2>&1
     git merge "$ticket" --squash --no-commit >/dev/null 2>&1
@@ -233,58 +235,83 @@ update() {
     git commit -m "${1:-$current_ticket-WIP}" >/dev/null 2>&1
     # Push changes to the master branch
     git push >/dev/null 2>&1
+
+    # Check if the commit is present on the current branch
+    commit_present_on_master=$(git log "$master_name" --oneline | grep -c "${1:-$current_ticket-WIP}")
+
+    if [ "$commit_present_on_master" -eq 0 ]; then
+        start_eco
+        printf "${RED}%s$ | Error: Could not publish \"%s\". Please try again {NC}\n" "$APPLICATION_NAME" "$current_ticket"
+        end_eco
+        return 1
+    fi
+
     start_eco
     printf "${BLUE}%s${NC} | ${GREEN}Project updated with \"%s\" successfully.${NC}\n" "$APPLICATION_NAME" "$ticket"
     end_eco
 }
-
 # Function: refresh
 #
 # Refresh the local repository by pulling changes from the current ticket branch and the master branch.
 # The changes from the master branch are merged into the current ticket branch.
 #
-# Usage: refresh
+# Usage: refresh [interval_in_seconds]
 refresh() {
     start_eco
     # Get the current ticket name
     current_ticket="$(get_current_ticket)"
 
-    # Check if there are any changes in the working tree
-    if [ "$(git status --porcelain)" ]; then
-        # Commit changes before pulling
-        git add -A >/dev/null 2>&1
-        git commit -m "${current_ticket:-temp-WIP-$(date +%s)}" >/dev/null 2>&1
-        git push --set-upstream origin "$current_ticket" >/dev/null 2>&1
-    fi
+    # Function to perform a single refresh
+    perform_refresh() {
+        # Check if there are any changes in the working tree
+        if [ "$(git status --porcelain)" ]; then
+            # Commit changes before pulling
+            git add -A >/dev/null 2>&1
+            git commit -m "${current_ticket:-temp-WIP-$(date +%s)}" >/dev/null 2>&1
+            git push --set-upstream origin "$current_ticket" >/dev/null 2>&1
+        fi
 
-    # Pull updates from origin of the current ticket
-    git pull >/dev/null 2>&1
+        # Pull updates from origin of the current ticket
+        git pull >/dev/null 2>&1
 
-    # Get the commit hash of your current branch's latest commit
-    current_branch_commit="$(git rev-parse HEAD)"
+        # Get the commit hash of your current branch's latest commit
+        current_branch_commit="$(git rev-parse HEAD)"
 
-    # Get the commit hash of the latest commit on the master branch
-    master_commit="$(git rev-parse "$master_name")"
+        # Get the commit hash of the latest commit on the master branch
+        master_commit="$(git rev-parse "$master_name")"
 
-    if [ "$current_branch_commit" != "$master_commit" ]; then
-        # Perform the merge only if it's needed
+        if [ "$current_branch_commit" != "$master_commit" ]; then
+            # Perform the merge only if it's needed
+            start_eco
+            printf "${BLUE}%s${NC} | Downloading team changes...\n" "$APPLICATION_NAME"
+            end_eco
+            # Switch to the master branch and pull updates
+            git checkout "$master_name" >/dev/null 2>&1 && git pull >/dev/null 2>&1
+            # Switch back to the current ticket branch
+            git checkout "$current_ticket" >/dev/null 2>&1
+            # Merge changes from master into the current ticket branch
+            git merge "$master_name" --no-commit >/dev/null 2>&1
+            check_conflicts
+            git add -A >/dev/null 2>&1
+            git commit -m "$current_ticket update with other tickets" >/dev/null 2>&1
+        fi
+
         start_eco
-        printf "${BLUE}%s${NC} | Downloading team changes...\n" "$APPLICATION_NAME"
+        printf "${BLUE}%s${NC} | Refreshing code...\n" "$APPLICATION_NAME"
         end_eco
-        # Switch to the master branch and pull updates
-        git checkout "$master_name" >/dev/null 2>&1 && git pull >/dev/null 2>&1
-        # Switch back to the current ticket branch
-        git checkout "$current_ticket" >/dev/null 2>&1
-        # Merge changes from master into the current ticket branch
-        git merge "$master_name" --no-commit >/dev/null 2>&1
-        check_conflicts
-        git add -A >/dev/null 2>&1
-        git commit -m "$current_ticket update with other tickets" >/dev/null 2>&1
-    fi
+    }
 
-    start_eco
-    printf "${BLUE}%s${NC} | Refreshing code...\n" "$APPLICATION_NAME"
-    end_eco
+    if [ -z "$1" ]; then
+        # If no parameter is provided, perform a single refresh
+        perform_refresh
+    else
+        # If an interval is provided, run in a loop
+        interval="$1"
+        while true; do
+            perform_refresh
+            sleep "$interval"
+        done
+    fi
 }
 
 # Function: combine
@@ -440,7 +467,7 @@ show_conflicts() {
         printf "${BLUE}%s${NC} | ${RED}There are still conflicts! Please remember to save files try again.${NC}\n" "$APPLICATION_NAME"
         end_eco
         check_conflicts
-        else
+    else
         start_eco
         printf "${BLUE}%s${NC} | ${GREEN}Conflicts resolved successfully.${NC}\n" "$APPLICATION_NAME"
         end_eco
@@ -467,7 +494,7 @@ list() {
         printf "${BLUE}%s${NC} | Available ticket branches:\n" "$APPLICATION_NAME"
         end_eco
         start_eco
-        echo "$ticket_branches" | sed 's/^/  - /'  # Add a prefix "-" to each branch name
+        echo "$ticket_branches" | sed 's/^/  - /' # Add a prefix "-" to each branch name
         end_eco
     fi
 }
@@ -570,7 +597,8 @@ end_eco() {
 help() {
     start_eco
 
-    help_message=$(cat << EOF
+    help_message=$(
+        cat <<EOF
 ${BLUE}$APPLICATION_NAME${NC} | Usage: git <command> [ticket_name]
 ${BLUE}$APPLICATION_NAME${NC} | Commands:
  - ${BLUE}start${NC}: Start or resume work on a ticket and refresh codebase.
