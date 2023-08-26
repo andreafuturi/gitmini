@@ -285,10 +285,6 @@ refresh() {
             start_eco
             printf "${BLUE}%s${NC} | Downloading team changes...\n" "$APPLICATION_NAME"
             end_eco
-            # Switch to the master branch and pull updates
-            git checkout "$master_name" >/dev/null 2>&1 && git pull >/dev/null 2>&1
-            # Switch back to the current ticket branch
-            git checkout "$current_ticket" >/dev/null 2>&1
             # Merge changes from master into the current ticket branch
             git merge "$master_name" --no-commit >/dev/null 2>&1
             check_conflicts
@@ -299,7 +295,7 @@ refresh() {
         start_eco
         printf "${BLUE}%s${NC} | Refreshing code...\n" "$APPLICATION_NAME"
         end_eco
-    }ririririi
+    }
 
     if [ -z "$1" ]; then
         # If no parameter is provided, perform a single refresh
