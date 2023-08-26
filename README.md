@@ -136,6 +136,10 @@ Shows all the commands with descriptions
 
 Requirements: Git must be installed
 
+### Drag and drop install
+
+Download the repository, drag the install.sh file into a terminal and press Enter
+
 ### Npm
 
 Open a terminal and run the following command:
@@ -152,11 +156,14 @@ sudo npm install gitmini -g
 
 ### Makefile
 
+In the GitMini folder
+
 install:
 
 ```bash
 make install
 ```
+
 uninstall:
 
 ```bash
