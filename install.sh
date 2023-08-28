@@ -11,7 +11,7 @@ APPLICATION_NAME="GitMini"
 bin_name="gitmini"
 
 configure_install_aliases() {
-    commands="publish unpublish start refresh current pause combine update list rename delete"
+    commands="publish unpublish review start refresh current pause combine update list rename delete"
 
     for cmd in $commands; do
         git config --global "alias.$cmd" "!${bin_name} $cmd"

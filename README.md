@@ -32,9 +32,27 @@ When executed, the git publish command automates the following actions:
 - Add all files to staging, do a commit
 - Bring your changes to the master branch
 
-Soon, an option to create a merge request instead of directly pushing to the master branch will be added.
+If instead you want to have your code reviewed before publishing it to master.
 
-The idea is to create `git review which will make the ticket reviewable by other team members before publishing.
+```bash
+git review "Ticket name/number"
+```
+
+This will create or checkout a special branch for the review of a ticket.
+In this branch you can see changes of the ticket in the working tree with a git diff command or in VS Code interface
+
+<img src="https://i.imgur.com/MIz0hh1.png" alt="git meme" width="300px" height="auto">
+
+Anyone in the team is able to push to this branch with his comments/changes.
+The branch is automatically synced between team with the git refresh commands (git refresh runs automatically in almost every gitmini operation)
+When team is satisfied with the ticket they can finally publish it with git publish "Ticket name/number"
+
+In the future we plan to expand the review feature with some configs
+
+- Option to make the ticket reviewed before being published
+- Option to require at least x approvals before a ticket is published
+- Option to directly publish the ticket if the review has X approvals
+- Option to decide which person of the team can approve a Review
 
 ```bash
 git unpublish "Ticket name/number"

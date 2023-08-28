@@ -7,14 +7,17 @@ setup_test_repository() {
     mkdir test-repo
     cd test-repo || return
     git init --initial-branch="$initial_branch"
-    echo "Initial commit" > README.md
+    git config commit.gpgSign false
+    git config push.gpgSign false
+    git config tag.gpgSign false
+    echo "Initial commit" >README.md
     git add README.md
     git commit -m "Initial commit"
 }
 
 # Function to cleanup the test Git repository
 cleanup_test_repository() {
-    # cd .. || return
+    cd .. || return
     rm -rf test-repo
 }
 
@@ -93,7 +96,7 @@ test_refresh() {
 
     # Make a commit in the master branch
     git checkout "$initial_branch"
-    echo "Commit in master" > master_commit.txt
+    echo "Commit in master" >master_commit.txt
     git add master_commit.txt
     git commit -m "Commit in master"
 
@@ -126,12 +129,12 @@ test_check_conflicts() {
     assert "" "$output" "check_conflicts should not display conflicts if there are no conflicts"
 
     # Make conflicting changes in the same file in the feature branch
-    echo "Feature branch content" > conflict.txt
+    echo "Feature branch content" >conflict.txt
     git add conflict.txt
     git commit -m "Commit in feature branch"
 
     git checkout "$initial_branch"
-    echo "Master branch content" > conflict.txt
+    echo "Master branch content" >conflict.txt
     git add conflict.txt
     git commit -m "Commit in master branch"
 
@@ -157,7 +160,7 @@ test_publish() {
     git checkout -b feature-123
 
     # Make some changes in the feature branch
-    echo "Feature branch changes" > feature_changes.txt
+    echo "Feature branch changes" >feature_changes.txt
 
     # Call the publish function
     gitmini publish
@@ -165,13 +168,13 @@ test_publish() {
     # Verify that changes are pushed to the remote repository and merged into the master branch
     git checkout "$initial_branch"
     commit_message="$(git log -1 --pretty=%B)"
-    expected_commit_message="feature-123"
+    expected_commit_message="feature-123 published on $initial_branch"
     assert "$expected_commit_message" "$commit_message" "publish should push changes to remote and merge into master"
 
     gitmini start feature-456
 
     # Make some changes in the feature branch
-    echo "branch feature changes" > feature_changes2.txt
+    echo "branch feature changes" >feature_changes2.txt
 
     # Call the publish function with a specific ticket
     gitmini publish feature-456
@@ -181,7 +184,7 @@ test_publish() {
 
     #current commit message
     commit_message="$(git log -1 --pretty=%B)"
-    expected_commit_message="feature-456"
+    expected_commit_message="feature-456 published on $initial_branch"
     assert "$expected_commit_message" "$commit_message" "publish should push changes from the specified ticket branch to remote and merge into master"
 
     gitmini start feature-789
@@ -189,12 +192,12 @@ test_publish() {
     gitmini pause
 
     #Make some conflicting changes in the master
-    echo "branch master changes" > conflict.txt
+    echo "branch master changes" >conflict.txt
 
     git switch feature-789
 
     # Make some changes in the feature branch
-    echo "branch feature changes" > conflict.txt
+    echo "branch feature changes" >conflict.txt
 
     # Call the publish function with a specific ticket
     gitmini publish feature-789 >/dev/null 2>&1
@@ -204,7 +207,7 @@ test_publish() {
     git checkout "$initial_branch"
     #current commit message
     commit_message="$(git log -1 --pretty=%B)"
-    expected_commit_message="feature-789"
+    expected_commit_message="feature-789 published on $initial_branch"
     assert "$expected_commit_message" "$commit_message" "publish should push changes from the specified ticket branch to remote and merge into master after conflicts resolving"
 
     cleanup_test_repository
@@ -215,7 +218,7 @@ test_unpublish() {
     git checkout -b feature-123
 
     # Make some changes in the feature branch
-    echo "Feature branch changes" > feature_changes.txt
+    echo "Feature branch changes" >feature_changes.txt
     git add feature_changes.txt
     git commit -m "Commit in feature branch"
 
@@ -228,12 +231,12 @@ test_unpublish() {
     # Verify that changes are reverted
     git checkout "$initial_branch"
     commit_message="$(git log -1 --pretty=%B)"
-    expected_commit_message="revert of feature-123"
+    expected_commit_message="revert of feature-123 published on $initial_branch"
     assert "$expected_commit_message" "$commit_message" "unpublish should revert changes in the master branch"
 
     #check unpublish of specific ticket
     git checkout -b feature-456
-    echo "Feature branch changes" > feature_changes.txt
+    echo "Feature branch changes" >feature_changes.txt
     git add feature_changes.txt
     git commit -m "Commit in feature branch"
     gitmini publish
@@ -242,6 +245,27 @@ test_unpublish() {
     commit_message="$(git log -1 --pretty=%B)"
     expected_commit_message="revert of feature-456"
     assert "$expected_commit_message" "$commit_message" "unpublish should revert changes in the master branch"
+
+    cleanup_test_repository
+}
+
+test_review() {
+    setup_test_repository
+    git checkout -b feature-123
+
+    # Make some changes in the feature branch
+    echo "Feature branch changes" >feature_changes.txt
+    git add feature_changes.txt
+    git commit -m "Commit in feature branch"
+
+    # Call the review function
+    gitmini review
+
+    # Verify that a branch named "review-feature-123" is created
+    git checkout -b review-feature-123
+    current_branch="$(git symbolic-ref --short HEAD)"
+    expected_branch="review-feature-123"
+    assert "$expected_branch" "$current_branch" "review should create a new branch named review-feature-123"
 
     cleanup_test_repository
 }

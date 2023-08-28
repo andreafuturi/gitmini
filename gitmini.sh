@@ -55,6 +55,8 @@ master_name="$(get_master_name)"
 # Usage: publish [ticket_name]
 
 publish() {
+    var="srest"
+    echo "T = ${var#te}"
     current_ticket="${1:-$(get_current_ticket)}"
     ticket="$(echo "$1" | tr ' ' '-')"
     # Get ticket name if provided; otherwise, use the current ticket
@@ -62,30 +64,43 @@ publish() {
         # If the current ticket is not the same as the one provided, start the provided ticket
         #if provided ticket doesn't correspond to existing branch name didn't exist print Creating one...
         if ! git show-ref --quiet --verify refs/heads/"$ticket"; then
-            start_eco
-            printf "${BLUE}%s${NC} | Creating ticket on the fly...\n" "$APPLICATION_NAME"
-            end_eco
+            print_banner "Creating ticket on the fly..."
         fi
         if [ "$ticket" != "$current_ticket" ]; then
-            start_eco
-            printf "${BLUE}%s${NC} | Pausing %s and resuming %s work...\n" "$APPLICATION_NAME" "$current_ticket" "$ticket"
-            end_eco
+            print_banner "Pausing $current_ticket and resuming $ticket work..."
         fi
         start "$ticket"
     else
         if [ -z "$current_ticket" ]; then
             # Start a ticket if none is started and no ticket name is provided
-            start_eco
-            printf "${BLUE}%s${NC} | Creating ticket on the fly...\n" "$APPLICATION_NAME"
-            end_eco
+            print_banner "Creating ticket on the fly..."
             start "$ticket"
         fi
         ticket="$(get_current_ticket)"
     fi
-    update "${ticket} published on ${master_name}" >/dev/null 2>&1
-    start_eco
-    printf "${BLUE}%s${NC} | ${GREEN}Work on \"%s\" published successfully.${NC}\n" "$APPLICATION_NAME" "$ticket"
-    end_eco
+
+    # Check if the ticket name starts with "review-"
+    if [ "${ticket#review-}" != "$ticket" ]; then
+
+        update "${ticket#review-} published on ${master_name}" >/dev/null 2>&1
+        # Delete the original ticket branch
+        delete "$current_ticket" >/dev/null 2>&1
+        print_banner "Work on \"${ticket#review-}\" published successfully." "$GREEN"
+
+    else
+        # Check if a review-ticket branch exists for the ticket
+        review_branch="review-$ticket"
+        if git show-ref --quiet --verify refs/heads/"$review_branch"; then
+            # Switch to the review branch
+            git checkout "$review_branch" >/dev/null 2>&1
+            # Publish the review-ticket branch instead of the ticket branch
+            update "${ticket#review-} published on ${master_name}" >/dev/null 2>&1
+        else
+            update "${ticket} published on ${master_name}" >/dev/null 2>&1
+        fi
+        print_banner "Work on \"$ticket\" published successfully." "$GREEN"
+
+    fi
 }
 
 # Function: unpublish
@@ -112,9 +127,7 @@ unpublish() {
     commit_hash="$(git log --grep="$ticket" --pretty=format:%H -n 1)"
 
     if [ -z "$commit_hash" ]; then
-        start_eco
-        printf "${BLUE}%s${NC} | ${RED}No ticket created with the name \"%s\".${NC}" "$APPLICATION_NAME" "$ticket"
-        end_eco
+        print_banner "No ticket created with the name \"$ticket\"." "$RED"
         exit 1
     fi
 
@@ -127,9 +140,8 @@ unpublish() {
 
     # Create a revert commit with the ticket name
     git commit -m "revert of $ticket" && git push >/dev/null 2>&1
-    start_eco
-    printf "${BLUE}%s${NC} | ${GREEN}Unpublishing of \"%s\" completed successfully.${NC}\n" "$APPLICATION_NAME" "$ticket"
-    end_eco
+    print_banner "Unpublishing of \"$ticket\" completed successfully." "$GREEN"
+
 }
 
 # Function: start
@@ -142,9 +154,7 @@ unpublish() {
 start() {
     init_userinfo
     if [ ! -d .git ]; then
-        start_eco
-        printf "${BLUE}%s${NC} | Repository not found. Initializing a new one...\n" "$APPLICATION_NAME"
-        end_eco
+        print_banner "Repository not found. Initializing a new one..."
         git init >/dev/null 2>&1
         #make first repo commit
         #create readme
@@ -160,28 +170,94 @@ start() {
     existing_current_ticket="$(get_current_ticket)"
     # if another ticket is in progress, pause it
     if [ "$ticket" = "$existing_current_ticket" ]; then
-        start_eco
-        printf "${BLUE}%s${NC} | ${ORANGE}Work on \"%s\" %s already started.${NC}\n" "$APPLICATION_NAME" "$ticket" "$message_verb"
-        end_eco
+        print_banner "Work on \"$ticket\" $message_verb already started." "$ORANGE"
+
     else
         if [ -n "$existing_current_ticket" ] && [ "$ticket" != "$existing_current_ticket" ]; then
             pause "$existing_current_ticket"
         fi
-        # create a new branch for the ticket
-        if git show-ref --quiet --verify refs/heads/"$ticket"; then
-            git checkout "$ticket" >/dev/null 2>&1
+        # check if a review branch exists for the ticket
+        review_branch="review-$ticket"
+        if git show-ref --quiet --verify refs/heads/"$review_branch"; then
+            # checkout to the review branch if it exists
+            git checkout "$review_branch" >/dev/null 2>&1
             message_verb="resumed"
         else
-            git checkout -b "$ticket" >/dev/null 2>&1
-            message_verb="started"
+            # create a new branch for the ticket
+            if git show-ref --quiet --verify refs/heads/"$ticket"; then
+                git checkout "$ticket" >/dev/null 2>&1
+                message_verb="resumed"
+            else
+                git checkout -b "$ticket" >/dev/null 2>&1
+                message_verb="started"
+            fi
         fi
         # update codebase
-        start_eco
-        printf "${BLUE}%s${NC} | ${GREEN}Work on \"%s\" %s successfully.${NC}\n" "$APPLICATION_NAME" "$ticket" "$message_verb"
-        end_eco
+        print_banner "Work on \"$ticket\" $message_verb successfully." "$GREEN"
+
         # update codebase /may be better to be before creating the branch?
     fi
     refresh
+}
+
+# Function: review
+#
+# Create or switch to a review branch for the specified ticket or the current ticket if not provided.
+#
+# Usage: review [ticket_name]
+
+review() {
+    refresh
+    ticket="${1:-$(get_current_ticket)}"
+    if [ -z "$ticket" ]; then
+        # List all existing review branches
+        list_review_branches
+        return
+    fi
+    review_branch="review-$ticket"
+
+    # Check if the review branch already exists
+    if git show-ref --quiet --verify refs/heads/"$review_branch"; then
+        # Switch to the existing review branch
+        git checkout "$review_branch" >/dev/null 2>&1
+
+        #commit that revert all commits that are not yet in master
+        git revert -n "$master_name".."$review_branch"
+        git add . && git commit -m "clean branch to see edits"
+
+        #reverts the revert commit and show all edits in the working tree
+        git revert HEAD -n
+
+        print_banner "You're reviewing \"$ticket\"."
+
+    else
+        # Create a new review branch based on the master branch
+        git checkout -b "$review_branch" "$master_name" >/dev/null 2>&1
+        git cherry-pick -n "$ticket" >/dev/null 2>&1
+        git add . >/dev/null 2>&1
+        git commit -m "$ticket changes" >/dev/null 2>&1
+        git push --set-upstream origin "$review_branch" >/dev/null 2>&1
+
+        print_banner "\"$ticket\" is now ready for team review."
+        # Switch back to the main branch
+        pause "$ticket"
+
+    fi
+}
+
+# Function: list_review_branches
+#
+# List all existing review branches.
+
+list_review_branches() {
+    review_branches="$(git branch --list | grep "review-" | sed 's/^..//' | sed 's/review-//')" # Remove the "review-" prefix
+    if [ -z "$review_branches" ]; then
+        print_banner "Nothing needs to be reviewed."
+
+    else
+        print_banner "Work in wait of review:"
+        echo "$review_branches" | sed 's/^/  - /' | print_banner
+    fi
 }
 
 # Function: pause
@@ -194,19 +270,16 @@ start() {
 pause() {
     current_ticket="${1:-$(get_current_ticket)}"
     if [ -z "$current_ticket" ]; then
-        start_eco
-        printf "${BLUE}%s${NC} | ${RED}You didn't start any ticket.${NC}\n" "$APPLICATION_NAME"
-        end_eco
+        print_banner "You didn't start any ticket." "$RED"
         exit 1
     fi
-    git add -A >/dev/null 2>&1
-    git commit -m "$current_ticket paused" >/dev/null 2>&1
+
+    # Commit changes before switching to the master branch
+    (git add -A && git commit -m "$current_ticket paused") >/dev/null 2>&1
 
     # Switch to the master branch
     git checkout "$master_name" >/dev/null 2>&1
-    start_eco
-    printf "${BLUE}%s${NC} | ${GREEN}Work on \"%s\" paused successfully.${NC}\n" "$APPLICATION_NAME" "$current_ticket"
-    end_eco
+    print_banner "Work on \"$current_ticket\" paused successfully." "$GREEN"
 }
 
 # Function: update
@@ -220,9 +293,8 @@ pause() {
 update() {
     refresh
     current_ticket="$(get_current_ticket)"
-    start_eco
-    printf "${BLUE}%s${NC} | Uploading your changes...\n" "$APPLICATION_NAME"
-    end_eco
+    print_banner "Uploading your changes..."
+
     git add -A >/dev/null 2>&1
     git commit -m "${1:-$current_ticket-WIP}" >/dev/null 2>&1
     git push --set-upstream origin >/dev/null 2>&1
@@ -240,24 +312,25 @@ update() {
     commit_present_on_master=$(git log "$master_name" --oneline | grep -c "${1:-$current_ticket-WIP}")
 
     if [ "$commit_present_on_master" -eq 0 ]; then
-        start_eco
-        printf "${RED}%s$ | Error: Could not publish \"%s\". Please try again {NC}\n" "$APPLICATION_NAME" "$current_ticket"
-        end_eco
-        return 1
+        print_banner "Error: Could not publish \"$current_ticket\". Please try again" "$RED"
+        exit 1
     fi
 
-    start_eco
-    printf "${BLUE}%s${NC} | ${GREEN}Project updated with \"%s\" successfully.${NC}\n" "$APPLICATION_NAME" "$ticket"
-    end_eco
+    print_banner "Project updated with \"$ticket\" successfully." "$GREEN"
+
 }
+
 # Function: refresh
 #
 # Refresh the local repository by pulling changes from the current ticket branch and the master branch.
 # The changes from the master branch are merged into the current ticket branch.
 #
 # Usage: refresh [interval_in_seconds]
+
+# shellcheck disable=SC2120
 refresh() {
-    start_eco
+    print_banner "Code Refreshed" "$BLUE"
+
     # Get the current ticket name
     current_ticket="$(get_current_ticket)"
 
@@ -282,19 +355,13 @@ refresh() {
 
         if [ "$current_branch_commit" != "$master_commit" ]; then
             # Perform the merge only if it's needed
-            start_eco
-            printf "${BLUE}%s${NC} | Downloading team changes...\n" "$APPLICATION_NAME"
-            end_eco
+            print_banner "Downloading Team Changes"
             # Merge changes from master into the current ticket branch
             git merge "$master_name" --no-commit >/dev/null 2>&1
             check_conflicts
             git add -A >/dev/null 2>&1
             git commit -m "$current_ticket update with other tickets" >/dev/null 2>&1
         fi
-
-        start_eco
-        printf "${BLUE}%s${NC} | Refreshing code...\n" "$APPLICATION_NAME"
-        end_eco
     }
 
     if [ -z "$1" ]; then
@@ -321,12 +388,10 @@ refresh() {
 
 combine() {
     # Ensure that at least two ticket names are provided
-    #default first ticket name should be the current one if only one ticket name is provided
-    #otherwise combine the given tickets name normally
+    # Default first ticket name should be the current one if only one ticket name is provided,
+    # otherwise combine the given ticket names normally
     if [ "$#" -lt 2 ]; then
-        start_eco
-        printf "${BLUE}%s${NC} | ${RED}Please provide at least two ticket names to combine.${NC}\n" "$APPLICATION_NAME"
-        end_eco
+        print_banner "Please provide at least two ticket names to combine." "$RED"
         exit 1
     fi
 
@@ -336,7 +401,7 @@ combine() {
     combined_branch="$(echo "$combined_branch" | sed 's/ /-/g')"
 
     # Create the combined branch
-    #pause current ticket if present
+    # Pause current ticket if present
     pause
     git checkout -b "$combined_branch" >/dev/null 2>&1
 
@@ -348,15 +413,11 @@ combine() {
             git add -A >/dev/null 2>&1
             git commit -m "Merging $ticket_name into $combined_branch" >/dev/null 2>&1
         else
-            start_eco
-            printf "${BLUE}%s${NC} | ${RED}\"%s\" does not exist.${NC}\n" "$APPLICATION_NAME" "$ticket_name"
-            end_eco
+            print_banner "\"$ticket_name\" does not exist." "$RED"
         fi
     done
 
-    start_eco
-    printf "${BLUE}%s${NC} | ${GREEN}Tickets merged into \"%s\" successfully.${NC}\n" "$APPLICATION_NAME" "$combined_branch"
-    end_eco
+    print_banner "Tickets merged into \"$combined_branch\" successfully." "$GREEN"
 }
 
 # Function: delete
@@ -367,7 +428,6 @@ combine() {
 # Usage: delete [ticket_name1] [ticket_name2] ... [ticket_name_n]
 
 delete() {
-    #in future we will have to check if ticket has been published before deleting otherwise ask confirmation (maybe unless an option is provided --force)
     for ticket in "$@"; do
         # Check if the ticket exists
         if git show-ref --quiet --verify refs/heads/"$ticket"; then
@@ -376,13 +436,9 @@ delete() {
                 pause "$ticket"
             fi
             git branch -D "$ticket" >/dev/null 2>&1
-            start_eco
-            printf "${BLUE}%s${NC} | ${GREEN}Ticket \"%s\" deleted successfully.${NC}\n" "$APPLICATION_NAME" "$ticket"
-            end_eco
+            print_banner "Ticket \"$ticket\" deleted successfully." "$GREEN"
         else
-            start_eco
-            printf "${BLUE}%s${NC} | ${RED}\"%s\" does not exist.${NC}\n" "$APPLICATION_NAME" "$ticket"
-            end_eco
+            print_banner "\"$ticket\" does not exist." "$RED"
         fi
     done
 }
@@ -410,14 +466,9 @@ get_current_ticket() {
 current() {
     current_ticket="$(get_current_ticket)"
     if [ -n "$current_ticket" ]; then
-        start_eco
-        printf "${BLUE}%s${NC} | You are currently working on ticket: ${BLUE}%s${NC}\n" "$APPLICATION_NAME" "$current_ticket"
-        end_eco
+        print_banner "You are currently working on ticket: $current_ticket"
     else
-        start_eco
-        printf "${BLUE}%s${NC} | You didn't start any ticket.\n" "$APPLICATION_NAME"
-        printf "${BLUE}%s${NC} | Start a new one with git start <ticket_name> or run directly git publish <ticket_name>\n" "$APPLICATION_NAME"
-        end_eco
+        print_banner "You didn't start any ticket.\nStart a new one with git start <ticket_name> or run directly git publish <ticket_name>"
     fi
 }
 
@@ -444,29 +495,20 @@ check_conflicts() {
 
 show_conflicts() {
     conflict_files="$(git diff --check)"
-    start_eco
-    printf "${BLUE}%s${NC} | ${ORANGE}Please fix conflicts in the following files:${NC}\n" "$APPLICATION_NAME"
-    end_eco
-    start_eco
+    print_banner "Please fix conflicts in the following files:" "$ORANGE"
     echo "$conflict_files"
-    end_eco
-    start_eco
     printf "After testing everything again, press Enter to continue..."
     read -r __
-    end_eco
+
     # Check for conflicts again after testing
-    #checks conflicts with more strategies
+    # Checks conflicts with more strategies
     conflict_files="$(git diff --check)"
 
     if [ -n "$conflict_files" ]; then
-        start_eco
-        printf "${BLUE}%s${NC} | ${RED}There are still conflicts! Please remember to save files try again.${NC}\n" "$APPLICATION_NAME"
-        end_eco
+        print_banner "There are still conflicts! Please remember to save files and try again." "$RED"
         check_conflicts
     else
-        start_eco
-        printf "${BLUE}%s${NC} | ${GREEN}Conflicts resolved successfully.${NC}\n" "$APPLICATION_NAME"
-        end_eco
+        print_banner "Conflicts resolved successfully." "$GREEN"
         git add -A >/dev/null 2>&1
         git rebase --continue >/dev/null 2>&1
     fi
@@ -482,16 +524,10 @@ show_conflicts() {
 list() {
     ticket_branches="$(git branch --list | grep -v "$master_name")"
     if [ -z "$ticket_branches" ]; then
-        start_eco
-        printf "${BLUE}%s${NC} | No tickets found. Create one with git start <ticket_name>\n" "$APPLICATION_NAME"
-        end_eco
+        print_banner "No tickets found. Create one with git start <ticket_name>"
     else
-        start_eco
-        printf "${BLUE}%s${NC} | Available ticket branches:\n" "$APPLICATION_NAME"
-        end_eco
-        start_eco
+        print_banner "Available ticket branches:"
         echo "$ticket_branches" | sed 's/^/  - /' # Add a prefix "-" to each branch name
-        end_eco
     fi
 }
 
@@ -576,11 +612,12 @@ init_userinfo() {
     fi
 }
 
-#Text formatting functions
-start_eco() {
+#Text formatting function
+print_banner() {
+    message="$1"
+    color="$2"
     printf "========================================\n\n"
-}
-end_eco() {
+    printf "${BLUE}%s${NC} | ${color}%s${NC} \n" "$APPLICATION_NAME" "$message"
     printf "\n========================================\n"
 }
 
@@ -591,7 +628,7 @@ end_eco() {
 # Usage: help
 
 help() {
-    start_eco
+    printf "========================================\n\n"
 
     help_message=$(
         cat <<EOF
@@ -615,7 +652,7 @@ EOF
     )
     echo "$help_message"
 
-    end_eco
+    printf "\n========================================\n"
 
     # printf "${BLUE}%s${NC} | For more information, visit\n" "$APPLICATION_NAME"
 }
