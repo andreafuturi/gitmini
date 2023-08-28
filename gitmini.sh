@@ -57,6 +57,7 @@ master_name="$(get_master_name)"
 publish() {
     current_ticket="${1:-$(get_current_ticket)}"
     ticket="$(echo "$1" | tr ' ' '-')"
+
     # Get ticket name if provided; otherwise, use the current ticket
     if [ -n "$1" ]; then
         # If the current ticket is not the same as the one provided, start the provided ticket
@@ -71,9 +72,16 @@ publish() {
     else
         if [ -z "$current_ticket" ]; then
             # Start a ticket if none is started and no ticket name is provided
-            print_banner "Creating ticket on the fly..."
-            start "$ticket"
+            print_banner "Publishing ticket on the fly..."
+            # Directly push changes to the master branch
+            refresh
+            git add -A >/dev/null 2>&1
+            git commit -m "WIP-$(date +%d-%m-%Y-%H-%M-%S)}" >/dev/null 2>&1
+            git push >/dev/null 2>&1
+            print_banner "Changes published successfully." "$GREEN"
+            return
         fi
+
         ticket="$(get_current_ticket)"
     fi
 

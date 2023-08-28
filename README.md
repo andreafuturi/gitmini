@@ -49,8 +49,8 @@ When team is satisfied with the ticket they can finally publish it with git publ
 
 In the future we plan to expand the review feature with some configs
 
-- Option to make the ticket reviewed before being published
-- Option to require at least x approvals before a ticket is published
+- Option to force the ticket to be reviewed before being published
+- Option to require at least x approvals before a ticket is published (will need a "git approve" command)
 - Option to directly publish the ticket if the review has X approvals
 - Option to decide which person of the team can approve a Review
 
