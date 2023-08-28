@@ -220,6 +220,7 @@ review() {
         list_review_branches
         return
     fi
+    start "$ticket"
     review_branch="review-$ticket"
 
     # Check if the review branch already exists

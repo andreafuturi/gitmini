@@ -28,7 +28,6 @@ When executed, the git publish command automates the following actions:
 
 - Safely updates your local repository while keeping your changes
 - Prompts you to resolve any possible conflicts before going on.
-- Creates a branch using specified ticket name `git checkout -B "Ticket name/number"`
 - Add all files to staging, do a commit
 - Bring your changes to the master branch
 
@@ -38,7 +37,7 @@ If instead you want to have your code reviewed before publishing it to master.
 git review "Ticket name/number"
 ```
 
-This will create or checkout a special branch for the review of a ticket.
+This will create or checkout a special branch for the review of that ticket.
 In this branch you can see changes of the ticket in the working tree with a git diff command or in VS Code interface
 
 <img src="https://i.imgur.com/MIz0hh1.png" alt="git meme" width="300px" height="auto">
