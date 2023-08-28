@@ -266,7 +266,9 @@ git publish feature-1
 git publish feature-2
 ```
 
-## Contributions
+## Contributors
+
+1. @ciro0405
 
 Contributions to GitMini are welcome! If you have any suggestions, bug reports, or feature requests, please create an issue or submit a pull request.
 
