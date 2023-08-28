@@ -55,8 +55,6 @@ master_name="$(get_master_name)"
 # Usage: publish [ticket_name]
 
 publish() {
-    var="srest"
-    echo "T = ${var#te}"
     current_ticket="${1:-$(get_current_ticket)}"
     ticket="$(echo "$1" | tr ' ' '-')"
     # Get ticket name if provided; otherwise, use the current ticket
