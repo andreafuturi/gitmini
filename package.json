@@ -9,7 +9,7 @@
   "scripts": {
     "test": "test.sh",
     "postinstall": "install.sh install-aliases",
-    "deploy": "git publish && npm publish"
+    "deploy": "./gitmini.sh publish && npm publish"
   },
   "repository": {
     "type": "git",
