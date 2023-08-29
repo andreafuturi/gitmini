@@ -40,7 +40,7 @@ git review "Ticket name/number"
 This will create or checkout a special branch for the review of that ticket.
 In this branch you can see changes of the ticket in the working tree with a git diff command or in VS Code interface
 
-<img src="https://i.imgur.com/MIz0hh1.png" alt="git meme" width="300px" height="auto">
+<img src="https://i.imgur.com/MIz0hh1.png" alt="git meme" width="800px" height="auto">
 
 Anyone in the team is able to push to this branch with his comments/changes.
 The branch is automatically synced between team with the git refresh commands (git refresh runs automatically in almost every gitmini operation)

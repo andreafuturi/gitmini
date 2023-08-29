@@ -1,14 +1,14 @@
 {
   "name": "gitmini",
-  "version": "0.1.41",
+  "version": "0.1.42",
   "description": "Minimal automated approach to GIT (git publish, git unpublish)",
   "bin": {
     "gm": "gitmini.sh",
     "gitmini": "gitmini.sh"
   },
   "scripts": {
-    "test": "./test.sh",
-    "postinstall": "./install.sh install-aliases"
+    "test": "test.sh",
+    "postinstall": "install.sh install-aliases"
   },
   "repository": {
     "type": "git",
