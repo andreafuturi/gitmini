@@ -475,7 +475,9 @@ current() {
     if [ -n "$current_ticket" ]; then
         print_banner "You are currently working on ticket: $current_ticket"
     else
-        print_banner "You didn't start any ticket.\nStart a new one with git start <ticket_name> or run directly git publish <ticket_name>"
+        print_banner "You didn't start any ticket. 
+
+Start a new one with git start <ticket_name> or run directly git publish <ticket_name>"
     fi
 }
 
@@ -557,9 +559,8 @@ rename() {
 
     # Check if the current ticket branch exists
     if ! git show-ref --quiet --verify refs/heads/"$current_ticket"; then
-        start_eco
+        printf "========================================\n\n"
         printf "${BLUE}%s${NC} | ${RED}Ticket \"%s\" does not exist.${NC}\n" "$APPLICATION_NAME" "$current_ticket"
-        end_eco
         exit 1
     fi
     git branch -m "$current_ticket" "$new_ticket" >/dev/null 2>&1
@@ -576,9 +577,9 @@ rename() {
     git push origin --delete old-branch-name >/dev/null 2>&1
     git push --set-upstream origin "$new_ticket" >/dev/null 2>&1
 
-    start_eco
+    printf "========================================\n\n"
     printf "${BLUE}%s${NC} | ${GREEN}Ticket \"%s\" renamed to \"%s\" successfully.${NC}\n" "$APPLICATION_NAME" "$current_ticket" "$new_ticket"
-    end_eco
+    printf "\n========================================\n"
 }
 
 # Function init_userinfo

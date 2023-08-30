@@ -1,15 +1,16 @@
 {
   "name": "gitmini",
   "version": "0.1.43",
-  "description": "Minimal automated approach to GIT (git publish, git unpublish)",
+  "description": "Minimal automated approach to GIT (git publish, git unpublish, git review)",
   "bin": {
     "gm": "gitmini.sh",
-    "gitmini": "gitmini.sh"
+    "gitmini": "gitmini.sh",
+    "gitmini_install": "install.sh"
   },
   "scripts": {
-    "test": "test.sh",
-    "postinstall": "install.sh install-aliases",
-    "deploy": "./gitmini.sh publish && npm publish"
+    "test": "./test.sh",
+    "postinstall": "gitmini_install install-aliases",
+    "deploy": "npm run test && git add . && git commit -m 'Committing changes for version bump' && npm version patch && git publish && npm publish"
   },
   "repository": {
     "type": "git",
