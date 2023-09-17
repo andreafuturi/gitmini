@@ -315,11 +315,19 @@ update() {
     # Push changes to the master branch
     git push >/dev/null 2>&1
 
-    # Check if the commit is present on the current branch
+    # Check if the commit is present on the master branch
     commit_present_on_master=$(git log "$master_name" --oneline | grep -c "${1:-$current_ticket-WIP}")
+
+    # Check if the commit is present on the master branch
+    commit_present_on_remote_master=$(git log origin/"$master_name" --oneline | grep -c "${1:-$current_ticket-WIP}")
 
     if [ "$commit_present_on_master" -eq 0 ]; then
         print_banner "Error: Could not publish \"$current_ticket\". Please try again" "$RED"
+        exit 1
+    fi
+
+    if [ "$commit_present_on_remote_master" -eq 0 ]; then
+        print_banner "Error: Could not update server with \"$current_ticket\". Please check your connection" "$RED"
         exit 1
     fi
 
