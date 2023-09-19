@@ -9,7 +9,6 @@
   },
   "scripts": {
     "test": "./test.sh",
-    "postinstall": "./install.sh install-aliases",
     "deploy": "npm run test && git add . && git commit -m 'Committing changes for version bump' && npm version patch && git publish && npm publish"
   },
   "repository": {
