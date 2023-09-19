@@ -308,7 +308,7 @@ update() {
 
     # Switch to the master branch and merge changes from the ticket branch with a single commit
     git checkout "$master_name" >/dev/null 2>&1
-
+    git pull >/dev/null 2>&1
     # make sure we are on master, otherwise don't publish anything
 
     git merge "$ticket" --squash --no-commit >/dev/null 2>&1
