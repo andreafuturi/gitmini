@@ -4,12 +4,11 @@
   "description": "Minimal automated approach to GIT (git publish, git unpublish, git review)",
   "bin": {
     "gm": "gitmini.sh",
-    "gitmini": "gitmini.sh",
-    "gitmini_install": "install.sh"
+    "gitmini": "gitmini.sh"
   },
   "scripts": {
-    "test": "./test.sh",
-    "postinstall": "gitmini_install install-aliases",
+    "test": "bash ./test.sh",
+    "postinstall": "bash ./install.sh install-aliases",
     "deploy": "npm run test && git add . && git commit -m 'Committing changes for version bump' && npm version patch && git publish && npm publish"
   },
   "repository": {

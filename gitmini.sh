@@ -327,6 +327,8 @@ update() {
         exit 1
     fi
 
+    #this should be done only if a origin exists
+
     if [ "$commit_present_on_remote_master" -eq 0 ]; then
         print_banner "Error: Could not update server with \"$current_ticket\". Please check your connection" "$RED"
         exit 1
