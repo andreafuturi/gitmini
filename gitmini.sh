@@ -88,7 +88,7 @@ publish() {
     # Check if the ticket name starts with "review-"
     if [ "${ticket#review-}" != "$ticket" ]; then
 
-        update "${ticket#review-} published on ${master_name}" >/dev/null 2>&1
+        update "${ticket#review-} published on ${master_name}"
         # Delete the original ticket branch
         delete "$current_ticket" >/dev/null 2>&1
         print_banner "Work on \"${ticket#review-}\" published successfully." "$GREEN"
@@ -100,9 +100,9 @@ publish() {
             # Switch to the review branch
             git checkout "$review_branch" >/dev/null 2>&1
             # Publish the review-ticket branch instead of the ticket branch
-            update "${ticket#review-} published on ${master_name}" >/dev/null 2>&1
+            update "${ticket#review-} published on ${master_name}"
         else
-            update "${ticket} published on ${master_name}" >/dev/null 2>&1
+            update "${ticket} published on ${master_name}"
         fi
         print_banner "Work on \"$ticket\" published successfully." "$GREEN"
 
@@ -308,6 +308,9 @@ update() {
 
     # Switch to the master branch and merge changes from the ticket branch with a single commit
     git checkout "$master_name" >/dev/null 2>&1
+
+    # make sure we are on master, otherwise don't publish anything
+
     git merge "$ticket" --squash --no-commit >/dev/null 2>&1
     check_conflicts
     git add -A >/dev/null
@@ -320,7 +323,6 @@ update() {
 
     # Check if the commit is present on the master branch
     commit_present_on_remote_master=$(git log origin/"$master_name" --oneline | grep -c "${1:-$current_ticket-WIP}")
-
     if [ "$commit_present_on_master" -eq 0 ]; then
         print_banner "Error: Could not publish \"$current_ticket\". Please try again" "$RED"
         exit 1
