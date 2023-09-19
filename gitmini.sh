@@ -300,7 +300,6 @@ pause() {
 update() {
     refresh
     current_ticket="$(get_current_ticket)"
-    print_banner "Uploading your changes..."
 
     git add -A >/dev/null 2>&1
     git commit -m "${1:-$current_ticket-WIP}" >/dev/null 2>&1
@@ -516,7 +515,7 @@ show_conflicts() {
     conflict_files="$(git diff --check)"
     print_banner "Please fix conflicts in the following files:" "$ORANGE"
     echo "$conflict_files"
-    printf "After testing everything again, press Enter to continue..."
+    print_banner "After testing everything again, press Enter to continue..." "$ORANGE"
     read -r __
 
     # Check for conflicts again after testing
