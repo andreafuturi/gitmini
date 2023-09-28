@@ -192,6 +192,10 @@ start() {
             # create a new branch for the ticket
             if git show-ref --quiet --verify refs/heads/"$ticket"; then
                 git checkout "$ticket" >/dev/null 2>&1
+                #resume any work in progress of that ticket
+                stash_ref=$(git stash list | grep -w "$1" | cut -d "{" -f2 | cut -d "}" -f1)
+                git stash apply stash@\{"$stash_ref"\} >/dev/null 2>&1
+                git stash drop stash@\{"$stash_ref"\} >/dev/null 2>&1
                 message_verb="resumed"
             else
                 git checkout -b "$ticket" >/dev/null 2>&1
@@ -281,6 +285,9 @@ pause() {
         exit 1
     fi
 
+    #Stash changes before switching to the master branch with branch name
+    git stash push -m "$current_ticket" >/dev/null 2>&1
+
     # Commit changes before switching to the master branch
     (git add -A && git commit -m "$current_ticket paused") >/dev/null 2>&1
 
@@ -310,7 +317,7 @@ update() {
     git pull >/dev/null 2>&1
     # make sure we are on master, otherwise don't publish anything
 
-    git merge "$ticket" --squash --no-commit >/dev/null 2>&1
+    git merge "$ticket" --squash --no-commit -Xignore-all-space >/dev/null 2>&1
     check_conflicts
     git add -A >/dev/null
     git commit -m "${1:-$current_ticket-WIP}" >/dev/null 2>&1
@@ -375,7 +382,7 @@ refresh() {
             # Perform the merge only if it's needed
             print_banner "Downloading Team Changes"
             # Merge changes from master into the current ticket branch
-            git merge "$master_name" --no-commit >/dev/null 2>&1
+            git merge "$master_name" --no-commit -Xignore-all-space >/dev/null 2>&1
             check_conflicts
             git add -A >/dev/null 2>&1
             git commit -m "$current_ticket update with other tickets" >/dev/null 2>&1
@@ -426,7 +433,7 @@ combine() {
     # Merge each ticket branch into the combined branch
     for ticket_name in "$@"; do
         if git show-ref --quiet --verify refs/heads/"$ticket_name"; then
-            git merge "$ticket_name" --no-commit >/dev/null 2>&1
+            git merge "$ticket_name" --no-commit -Xignore-all-space >/dev/null 2>&1
             check_conflicts
             git add -A >/dev/null 2>&1
             git commit -m "Merging $ticket_name into $combined_branch" >/dev/null 2>&1

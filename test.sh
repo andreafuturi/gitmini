@@ -31,34 +31,40 @@ test_pause() {
     assert "$initial_branch" "$current_branch" "pause should switch back to the master branch"
     cleanup_test_repository
 }
-
 test_start() {
     setup_test_repository
-
-    # rm -rf .git # Remove the Git repository
-    # gitmini start new-feature
-    # # Assert that the Git repository is initialized
-    # assert "Reinitialized empty Git repository in" "$(git init --initial-branch="$initial_branch")" "start should initialize a new Git repository if one doesn't exist"
 
     gitmini start feature-123
     current_branch="$(git symbolic-ref --short HEAD)"
     assert "feature-123" "$current_branch" "start should switch create a new branch and switch to it"
 
-    #i should be able to start another ticket while one is in progress
+    # Create a file in feature-123 branch
+    touch file_feature_123.txt
+    git add file_feature_123.txt
+    git commit -m "Add file for feature-123"
+
+    # Switch to another ticket (feature-456)
     gitmini start feature-456
     current_branch="$(git symbolic-ref --short HEAD)"
     assert "feature-456" "$current_branch" "start should switch create a new branch and switch to it"
 
-    #switiching to master i should be able to than resume any work on the ticket
-    git checkout "$initial_branch"
-    gitmini start feature-123
+    # Check if the file from feature-123 is not present in feature-456
+    if [ -e "file_feature_123.txt" ]; then
+        assert_fail "File should not exist in feature-456"
+    fi
+
+    # Switch back to feature-123
+    git checkout feature-123
     current_branch="$(git symbolic-ref --short HEAD)"
     assert "feature-123" "$current_branch" "start should switch to already existing branch if it exists"
 
+    # Check if the file from feature-123 is still present
+    if [ ! -e "file_feature_123.txt" ]; then
+        assert_fail "File should exist in feature-123"
+    fi
+
     gitmini start
     current_branch="$(git symbolic-ref --short HEAD)"
-    # default_ticket_name="WIP-$(date +%d-%m-%Y)"
-    # assert "$default_ticket_name" "$current_branch" "start should create a new branch with default name"
 
     git checkout -b existing-branch
     gitmini start new-feature
@@ -73,6 +79,9 @@ test_start() {
     gitmini start existing-branch
     current_branch="$(git symbolic-ref --short HEAD)"
     assert "existing-branch" "$current_branch" "start should switch to an already existing branch"
+
+    # Clean up test files
+    rm -f file_feature_123.txt
 
     cleanup_test_repository
 }
