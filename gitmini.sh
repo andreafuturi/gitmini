@@ -288,9 +288,6 @@ pause() {
     #Stash changes before switching to the master branch with branch name
     git stash push -m "$current_ticket" >/dev/null 2>&1
 
-    # Commit changes before switching to the master branch
-    (git add -A && git commit -m "$current_ticket paused") >/dev/null 2>&1
-
     # Switch to the master branch
     git checkout "$master_name" >/dev/null 2>&1
     print_banner "Work on \"$current_ticket\" paused successfully." "$GREEN"
