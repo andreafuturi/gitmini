@@ -286,7 +286,7 @@ pause() {
     fi
 
     #Stash changes before switching to the master branch with branch name
-    git stash push -m "$current_ticket" >/dev/null 2>&1
+    git stash push -m "$current_ticket" -u >/dev/null 2>&1
 
     # Switch to the master branch
     git checkout "$master_name" >/dev/null 2>&1
